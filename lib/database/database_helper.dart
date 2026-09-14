@@ -3,6 +3,7 @@ import 'package:sqflite/sqflite.dart';
 
 import '../models/category.dart';
 import '../models/expense.dart';
+import '../models/expense_with_category.dart';
 import '../models/settings.dart';
 
 import '../utils/date_time_utils.dart';
@@ -216,6 +217,37 @@ class DatabaseHelper {
 
     // 이번 달 지출이 없으면 0 반환
     return total == null ? 0 : total as int;
+  }
+
+  // 최근 지출 내역 조회
+  Future<List<ExpenseWithCategory>> getRecentExpenses() async {
+    final db = await database;
+
+    final result = await db.rawQuery(''' 
+        SELECT 
+          expenses.id, 
+          expenses.amount, 
+          expenses.date, 
+          categories.name AS categoryName, 
+          expenses.payer, 
+          expenses.memo 
+        FROM expenses 
+        INNER JOIN categories 
+          ON expenses.categoryId = categories.id 
+        ORDER BY expenses.date DESC, expenses.id DESC 
+        LIMIT 5 
+      ''');
+
+    return result.map((map) {
+      return ExpenseWithCategory(
+        id: map['id'] as int?,
+        amount: map['amount'] as int,
+        date: DateTime.parse(map['date'] as String),
+        categoryName: map['categoryName'] as String,
+        payer: map['payer'] as String,
+        memo: map['memo'] as String?,
+      );
+    }).toList();
   }
 
   // ========================================================= settings =========================================================
