@@ -5,6 +5,8 @@ import '../models/category.dart';
 import '../models/expense.dart';
 import '../models/settings.dart';
 
+import '../utils/date_time_utils.dart';
+
 class DatabaseHelper {
   // 데이터베이스 파일 이름
   static const String _databaseName = 'wedding_money_manager.db';
@@ -175,6 +177,47 @@ class DatabaseHelper {
     return await db.delete('expenses', where: 'id = ?', whereArgs: [id]);
   }
 
+  // 전체 지출 금액 조회
+  Future<int> getTotalExpense() async {
+    final db = await database;
+
+    final result = await db.rawQuery(
+      'SELECT SUM(amount) AS total FROM expenses',
+    );
+
+    final total = result.first['total'];
+
+    // 지출 내역이 없으면 0 반환
+    return total == null ? 0 : total as int;
+  }
+
+  // 이번 달 지출 금액 조회
+  Future<int> getMonthlyExpense() async {
+    final db = await database;
+
+    final now = DateTimeUtils.nowKst();
+
+    // 이번 달의 시작 날짜
+    final startDate = DateTime(now.year, now.month, 1);
+
+    // 다음 달의 시작 날짜
+    final endDate = DateTime(now.year, now.month + 1, 1);
+
+    final result = await db.rawQuery(
+      '''
+        SELECT SUM(amount) AS total
+        FROM expenses
+        WHERE date >= ? AND date < ?
+      ''',
+      [startDate.toIso8601String(), endDate.toIso8601String()],
+    );
+
+    final total = result.first['total'];
+
+    // 이번 달 지출이 없으면 0 반환
+    return total == null ? 0 : total as int;
+  }
+
   // ========================================================= settings =========================================================
   // 설정 전체 조회
   Future<List<Settings>> getSettings() async {
@@ -227,5 +270,16 @@ class DatabaseHelper {
     final db = await database;
 
     return await db.delete('settings', where: 'id = ?', whereArgs: [id]);
+  }
+
+  // 예산 조회
+  Future<int?> getBudget() async {
+    final setting = await getSetting('budget');
+
+    if (setting == null) {
+      return null;
+    }
+
+    return int.tryParse(setting.value);
   }
 }

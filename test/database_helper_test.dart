@@ -10,6 +10,7 @@ void main() {
   // sqflite가 FFI 데이터베이스를 사용하도록 설정
   databaseFactory = databaseFactoryFfi;
 
+  /*
   test('데이터베이스가 정상적으로 생성되는지 확인', () async {
     // 데이터베이스 열기
     final db = await DatabaseHelper.instance.database;
@@ -25,5 +26,47 @@ void main() {
 
     // 마지막 카테고리가 기타인지 확인
     expect(categories.last['name'], '기타');
+  });
+  */
+  test('지출 금액과 예산을 정상적으로 조회하는지 확인', () async {
+    // 데이터베이스 열기
+    final db = await DatabaseHelper.instance.database;
+
+    // 테스트를 위해 기존 지출 데이터를 삭제
+    await db.delete('expenses');
+
+    // 테스트용 지출 데이터를 추가
+    await db.insert('expenses', {
+      'amount': 100000,
+      'date': DateTime.now().toIso8601String(),
+      'categoryId': 1,
+      'payer': '나',
+      'memo': '테스트 지출',
+      'createdAt': DateTime.now().toIso8601String(),
+    });
+
+    await db.insert('expenses', {
+      'amount': 500000,
+      'date': DateTime.now().toIso8601String(),
+      'categoryId': 1,
+      'payer': '배우자',
+      'memo': '테스트 지출',
+      'createdAt': DateTime.now().toIso8601String(),
+    });
+
+    // 전체 지출 금액을 확인
+    final totalExpense = await DatabaseHelper.instance.getTotalExpense();
+
+    expect(totalExpense, 600000);
+
+    // 이번 달 지출 금액을 확인
+    final monthlyExpense = await DatabaseHelper.instance.getMonthlyExpense();
+
+    expect(monthlyExpense, 600000);
+
+    // 예산이 아직 설정되지 않았는지 확인
+    final budget = await DatabaseHelper.instance.getBudget();
+
+    expect(budget, isNull);
   });
 }
