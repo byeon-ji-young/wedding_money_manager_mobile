@@ -250,6 +250,36 @@ class DatabaseHelper {
     }).toList();
   }
 
+  // 전체 지출 내역 조회
+  Future<List<ExpenseWithCategory>> getAllExpenses() async {
+    final db = await database;
+
+    final result = await db.rawQuery('''
+      SELECT
+        expenses.id,
+        expenses.amount,
+        expenses.date,
+        categories.name AS categoryName,
+        expenses.payer,
+        expenses.memo
+      FROM expenses
+      INNER JOIN categories
+        ON expenses.categoryId = categories.id
+      ORDER BY expenses.date DESC, expenses.id DESC
+    ''');
+
+    return result.map((map) {
+      return ExpenseWithCategory(
+        id: map['id'] as int?,
+        amount: map['amount'] as int,
+        date: DateTime.parse(map['date'] as String),
+        categoryName: map['categoryName'] as String,
+        payer: map['payer'] as String,
+        memo: map['memo'] as String?,
+      );
+    }).toList();
+  }
+
   // 전체 지출 건수 조회
   Future<int> getExpenseCount() async {
     final db = await database;

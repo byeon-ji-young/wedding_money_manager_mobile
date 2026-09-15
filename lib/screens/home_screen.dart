@@ -6,6 +6,7 @@ import '../models/expense_with_category.dart';
 import '../models/settings.dart';
 
 import 'expense_register_screen.dart';
+import 'expense_list_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -468,7 +469,13 @@ class _HomeScreenState extends State<HomeScreen> {
                         if (expenseCount > 5)
                           TextButton(
                             onPressed: () {
-                              // 나중에 전체 지출 내역 화면으로 이동
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      const ExpenseListScreen(),
+                                ),
+                              );
                             },
                             child: const Text('전체보기'),
                           ),
