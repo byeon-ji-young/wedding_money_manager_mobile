@@ -4,6 +4,8 @@ import '../database/database_helper.dart';
 
 import '../models/expense_with_category.dart';
 
+import 'expense_register_screen.dart';
+
 class ExpenseListScreen extends StatefulWidget {
   const ExpenseListScreen({super.key});
 
@@ -105,6 +107,33 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
                 return Card(
                   margin: const EdgeInsets.only(bottom: 12),
                   child: ListTile(
+                    onTap: () async {
+                      // 지출 ID가 없는 경우
+                      if (expense.id == null) {
+                        return;
+                      }
+
+                      // 지출 ID로 원본 지출 정보 조회
+                      final result = await DatabaseHelper.instance
+                          .getExpenseById(expense.id!);
+
+                      // 지출 정보를 찾지 못한 경우
+                      if (result == null || !context.mounted) {
+                        return;
+                      }
+
+                      // 지출 수정 화면으로 이동
+                      await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              ExpenseRegisterScreen(expense: result),
+                        ),
+                      );
+
+                      // 수정 후 목록 다시 불러오기
+                      loadExpenses();
+                    },
                     leading: Icon(getCategoryIcon(expense.categoryName)),
                     title: Text(
                       expense.categoryName,

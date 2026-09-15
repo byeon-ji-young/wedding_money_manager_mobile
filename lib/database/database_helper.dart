@@ -289,6 +289,19 @@ class DatabaseHelper {
     return result.first['count'] as int;
   }
 
+  // 지출 ID로 지출 정보 조회
+  Future<Expense?> getExpenseById(int id) async {
+    final db = await database;
+
+    final result = await db.query('expenses', where: 'id = ?', whereArgs: [id]);
+
+    if (result.isEmpty) {
+      return null;
+    }
+
+    return Expense.fromMap(result.first);
+  }
+
   // ========================================================= settings =========================================================
   // 설정 전체 조회
   Future<List<Settings>> getSettings() async {

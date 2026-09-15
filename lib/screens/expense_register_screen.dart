@@ -6,7 +6,10 @@ import '../database/database_helper.dart';
 import '../models/category.dart';
 
 class ExpenseRegisterScreen extends StatefulWidget {
-  const ExpenseRegisterScreen({super.key});
+  // 수정할 지출
+  final Expense? expense;
+
+  const ExpenseRegisterScreen({super.key, this.expense});
 
   @override
   State<ExpenseRegisterScreen> createState() => _ExpenseRegisterScreenState();
@@ -23,13 +26,24 @@ class _ExpenseRegisterScreenState extends State<ExpenseRegisterScreen> {
   int? selectedCategoryId;
   // 선택한 결제자
   String selectedPayer = '나';
-
   // 카테고리 목록
   List<Category> categories = [];
+  // 등록, 수정 판단
+  bool get isEditMode => widget.expense != null;
 
   @override
   void initState() {
     super.initState();
+
+    // 수정 모드라면 기존 지출 정보를 입력값에 넣기
+    if (isEditMode) {
+      amountController.text = widget.expense!.amount.toString();
+      memoController.text = widget.expense!.memo ?? '';
+
+      selectedDate = widget.expense!.date;
+      selectedCategoryId = widget.expense!.categoryId;
+      selectedPayer = widget.expense!.payer;
+    }
 
     loadCategories();
   }
@@ -54,7 +68,7 @@ class _ExpenseRegisterScreenState extends State<ExpenseRegisterScreen> {
       categories = result;
 
       // 처음에는 첫 번째 카테고리를 선택
-      if (categories.isNotEmpty) {
+      if (categories.isNotEmpty && !isEditMode) {
         selectedCategoryId = categories.first.id;
       }
     });
@@ -85,6 +99,7 @@ class _ExpenseRegisterScreenState extends State<ExpenseRegisterScreen> {
 
     // 지출 객체 생성
     final expense = Expense(
+      id: widget.expense?.id,
       amount: amount,
       date: selectedDate,
       categoryId: selectedCategoryId!,
@@ -92,19 +107,79 @@ class _ExpenseRegisterScreenState extends State<ExpenseRegisterScreen> {
       memo: memoController.text.trim().isEmpty
           ? null
           : memoController.text.trim(),
-      createdAt: DateTimeUtils.nowKst(),
+      createdAt: widget.expense?.createdAt ?? DateTimeUtils.nowKst(),
     );
 
-    // SQLite에 지출 저장
-    await DatabaseHelper.instance.insertExpense(expense);
+    // 수정 모드라면 기존 지출 수정
+    if (isEditMode) {
+      await DatabaseHelper.instance.updateExpense(expense);
+    }
+    // 등록 모드라면 새로운 지출 등록
+    else {
+      await DatabaseHelper.instance.insertExpense(expense);
+    }
 
     // 화면이 이미 종료된 경우 중단
     if (!mounted) return;
 
     // 저장 완료 안내
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(isEditMode ? '지출이 수정되었습니다.' : '지출이 등록되었습니다.')),
+    );
+
+    // 이전 화면으로 돌아가기
+    Navigator.pop(context);
+  }
+
+  // 지출 삭제
+  Future<void> deleteExpense() async {
+    // 삭제할 지출 ID가 없는 경우
+    if (widget.expense?.id == null) {
+      return;
+    }
+
+    // 삭제 확인
+    final shouldDelete = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          // title: const Text('지출 삭제'),
+          content: const Text('이 지출을 삭제할까요?\n삭제한 지출은 복구할 수 없습니다.'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context, false);
+              },
+              child: const Text('취소'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context, true);
+              },
+              style: TextButton.styleFrom(foregroundColor: Colors.red),
+              child: const Text('삭제'),
+            ),
+          ],
+        );
+      },
+    );
+
+    // 삭제하지 않으면 종료
+    if (shouldDelete != true) {
+      return;
+    }
+
+    // DB에서 지출 삭제
+    await DatabaseHelper.instance.deleteExpense(widget.expense!.id!);
+
+    if (!mounted) {
+      return;
+    }
+
+    // 삭제 완료 메시지
     ScaffoldMessenger.of(
       context,
-    ).showSnackBar(const SnackBar(content: Text('지출이 등록되었습니다.')));
+    ).showSnackBar(const SnackBar(content: Text('지출이 삭제되었습니다.')));
 
     // 이전 화면으로 돌아가기
     Navigator.pop(context);
@@ -115,7 +190,21 @@ class _ExpenseRegisterScreenState extends State<ExpenseRegisterScreen> {
     final primaryColor = Theme.of(context).primaryColor;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('지출 등록'), centerTitle: true),
+      appBar: AppBar(
+        title: Text(isEditMode ? '지출 수정' : '지출 등록'),
+        centerTitle: true,
+        actions: [
+          if (isEditMode)
+            IconButton(
+              onPressed: deleteExpense,
+              icon: const Icon(
+                Icons.delete_outline_rounded,
+                color: Colors.redAccent,
+                size: 22,
+              ),
+            ),
+        ],
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
