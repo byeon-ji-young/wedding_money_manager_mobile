@@ -18,6 +18,7 @@ class _HomeScreenState extends State<HomeScreen> {
   int? budget;
   int totalExpense = 0;
   int monthlyExpense = 0;
+  int expenseCount = 0;
 
   // 최근 지출 내역
   List<ExpenseWithCategory> recentExpenses = [];
@@ -37,6 +38,7 @@ class _HomeScreenState extends State<HomeScreen> {
       DatabaseHelper.instance.getTotalExpense(),
       DatabaseHelper.instance.getMonthlyExpense(),
       DatabaseHelper.instance.getRecentExpenses(),
+      DatabaseHelper.instance.getExpenseCount(),
     ]);
 
     // 화면이 아직 존재할 때만 상태 변경
@@ -49,6 +51,7 @@ class _HomeScreenState extends State<HomeScreen> {
       totalExpense = result[1] as int;
       monthlyExpense = result[2] as int;
       recentExpenses = result[3] as List<ExpenseWithCategory>;
+      expenseCount = result[4] as int;
 
       // 데이터 로딩 완료
       isLoading = false;
@@ -438,20 +441,37 @@ class _HomeScreenState extends State<HomeScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text(
-                          '최근 지출',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                          ),
+                        // 최근 지출 + 전체 건수
+                        Row(
+                          children: [
+                            const Text(
+                              '최근 지출',
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+
+                            const SizedBox(width: 8),
+
+                            Text(
+                              '총 $expenseCount건',
+                              style: TextStyle(
+                                fontSize: 15,
+                                color: Colors.grey[800],
+                              ),
+                            ),
+                          ],
                         ),
 
-                        TextButton(
-                          onPressed: () {
-                            // 나중에 전체 지출 내역 화면으로 이동
-                          },
-                          child: const Text('전체보기'),
-                        ),
+                        // 지출이 5건을 초과하면 전체보기 표시
+                        if (expenseCount > 5)
+                          TextButton(
+                            onPressed: () {
+                              // 나중에 전체 지출 내역 화면으로 이동
+                            },
+                            child: const Text('전체보기'),
+                          ),
                       ],
                     ),
 

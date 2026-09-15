@@ -250,6 +250,15 @@ class DatabaseHelper {
     }).toList();
   }
 
+  // 전체 지출 건수 조회
+  Future<int> getExpenseCount() async {
+    final db = await database;
+
+    final result = await db.rawQuery('SELECT COUNT(*) AS count FROM expenses');
+
+    return result.first['count'] as int;
+  }
+
   // ========================================================= settings =========================================================
   // 설정 전체 조회
   Future<List<Settings>> getSettings() async {
