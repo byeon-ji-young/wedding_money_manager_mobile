@@ -22,7 +22,8 @@ class WeddingMoneyManagerApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.pink),
         useMaterial3: true,
-        textTheme: GoogleFonts.ibmPlexSansKrTextTheme(),
+        // textTheme: GoogleFonts.ibmPlexSansKrTextTheme(),
+        textTheme: GoogleFonts.juaTextTheme(),
       ),
       home: const HomeScreen(),
     );
