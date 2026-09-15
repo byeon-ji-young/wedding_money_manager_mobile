@@ -5,6 +5,8 @@ import '../database/database_helper.dart';
 import '../models/expense_with_category.dart';
 import '../models/settings.dart';
 
+import 'expense_register_screen.dart';
+
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -545,6 +547,40 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
             ),
+
+      // 하단 지출 등록 버튼
+      bottomNavigationBar: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 8, 20, 12),
+          child: SizedBox(
+            width: double.infinity,
+            height: 56,
+            child: ElevatedButton.icon(
+              onPressed: () async {
+                await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const ExpenseRegisterScreen(),
+                  ),
+                );
+
+                // 등록 화면에서 돌아오면 홈 데이터 다시 불러오기
+                loadData();
+              },
+              icon: const Icon(Icons.add_rounded, size: 24),
+              label: const Text(
+                '지출 등록',
+                style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+              ),
+              style: ElevatedButton.styleFrom(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(18),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
