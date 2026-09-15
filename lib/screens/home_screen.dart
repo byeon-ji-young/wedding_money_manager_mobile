@@ -7,6 +7,7 @@ import '../models/settings.dart';
 
 import 'expense_register_screen.dart';
 import 'expense_list_screen.dart';
+import 'statistics_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -194,9 +195,15 @@ class _HomeScreenState extends State<HomeScreen> {
         actions: [
           IconButton(
             onPressed: () async {
-              // 추후
+              await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const StatisticsScreen(),
+                ),
+              );
             },
-            icon: const Icon(Icons.settings_outlined, size: 22),
+            icon: const Icon(Icons.bar_chart_rounded),
+            tooltip: '지출 통계',
           ),
         ],
       ),

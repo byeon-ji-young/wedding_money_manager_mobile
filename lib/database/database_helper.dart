@@ -302,6 +302,24 @@ class DatabaseHelper {
     return Expense.fromMap(result.first);
   }
 
+  // 카테고리별 합계 조회
+  Future<List<Map<String, dynamic>>> getExpenseSummaryByCategory() async {
+    final db = await database;
+
+    final result = await db.rawQuery('''
+      SELECT
+        categories.name AS categoryName,
+        SUM(expenses.amount) AS totalAmount
+      FROM expenses
+      INNER JOIN categories
+        ON expenses.categoryId = categories.id
+      GROUP BY expenses.categoryId
+      ORDER BY totalAmount DESC
+    ''');
+
+    return result;
+  }
+
   // ========================================================= settings =========================================================
   // 설정 전체 조회
   Future<List<Settings>> getSettings() async {
