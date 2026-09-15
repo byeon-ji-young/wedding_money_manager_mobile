@@ -302,7 +302,7 @@ class DatabaseHelper {
     return Expense.fromMap(result.first);
   }
 
-  // 카테고리별 합계 조회
+  // 카테고리별 지출 합계 조회
   Future<List<Map<String, dynamic>>> getExpenseSummaryByCategory() async {
     final db = await database;
 
@@ -315,6 +315,22 @@ class DatabaseHelper {
         ON expenses.categoryId = categories.id
       GROUP BY expenses.categoryId
       ORDER BY totalAmount DESC
+    ''');
+
+    return result;
+  }
+
+  // 월별 지출 합계 조회
+  Future<List<Map<String, dynamic>>> getMonthlyExpenseSummary() async {
+    final db = await database;
+
+    final result = await db.rawQuery('''
+      SELECT
+        strftime('%Y-%m', date) AS month,
+        SUM(amount) AS totalAmount
+      FROM expenses
+      GROUP BY strftime('%Y-%m', date)
+      ORDER BY month DESC
     ''');
 
     return result;

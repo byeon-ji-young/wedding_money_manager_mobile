@@ -10,8 +10,10 @@ class StatisticsScreen extends StatefulWidget {
 }
 
 class _StatisticsScreenState extends State<StatisticsScreen> {
-  // 카테고리 합계
+  // 카테고리 지출 합계
   List<Map<String, dynamic>> categorySummary = [];
+  // 월별 지출 합계
+  List<Map<String, dynamic>> monthlySummary = [];
   // 전체 지출 금액
   int totalExpense = 0;
   // 전체 예산
@@ -32,6 +34,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
         DatabaseHelper.instance.getExpenseSummaryByCategory(),
         DatabaseHelper.instance.getTotalExpense(),
         DatabaseHelper.instance.getBudget(),
+        DatabaseHelper.instance.getMonthlyExpenseSummary(),
       ]);
 
       if (!mounted) {
@@ -42,6 +45,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
         categorySummary = result[0] as List<Map<String, dynamic>>;
         totalExpense = result[1] as int;
         budget = result[2] as int?;
+        monthlySummary = result[3] as List<Map<String, dynamic>>;
 
         isLoading = false;
       });
@@ -248,6 +252,78 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                               value: totalExpense == 0
                                   ? 0
                                   : totalAmount / totalExpense,
+                              minHeight: 10,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                }),
+
+                const SizedBox(height: 16),
+
+                const Text(
+                  '월별 지출',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+
+                const SizedBox(height: 12),
+
+                ...monthlySummary.map((item) {
+                  final month = item['month'] as String;
+                  final totalAmount = item['totalAmount'] as int;
+
+                  final percentage = totalExpense == 0
+                      ? 0.0
+                      : totalAmount / totalExpense;
+
+                  return Card(
+                    margin: const EdgeInsets.only(bottom: 12),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // 월
+                          Text(
+                            '${month.substring(0, 4)}년 ${int.parse(month.substring(5, 7))}월',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                          ),
+
+                          const SizedBox(height: 8),
+
+                          // 금액 + 전체 지출 대비 비율
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                '${formatAmount(totalAmount)}원',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              Text(
+                                '${(percentage * 100).toStringAsFixed(1)}%',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: Theme.of(context).colorScheme.primary,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+
+                          const SizedBox(height: 8),
+
+                          // 월별 지출 비율 막대
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: LinearProgressIndicator(
+                              value: percentage,
                               minHeight: 10,
                             ),
                           ),
