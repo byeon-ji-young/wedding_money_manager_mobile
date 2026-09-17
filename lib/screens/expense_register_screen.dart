@@ -191,7 +191,7 @@ class _ExpenseRegisterScreenState extends State<ExpenseRegisterScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(isEditMode ? '지출 수정' : '지출 등록'),
+        title: Text(isEditMode ? '지출 수정' : '지출 추가'),
         centerTitle: true,
         actions: [
           if (isEditMode)

@@ -663,7 +663,7 @@ class _HomeScreenState extends State<HomeScreen> {
               },
               icon: const Icon(Icons.add_rounded, size: 24),
               label: const Text(
-                '지출 등록',
+                '지출 추가',
                 style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
               ),
               style: ElevatedButton.styleFrom(
