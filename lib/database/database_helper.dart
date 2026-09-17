@@ -97,7 +97,7 @@ class DatabaseHelper {
     final defaultCategories = [
       '예식장',
       '스드메',
-      '스냅영상',
+      '스냅/영상',
       '맞춤정장',
       '예물',
       '신혼여행',

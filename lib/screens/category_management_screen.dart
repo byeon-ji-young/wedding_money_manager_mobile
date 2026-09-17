@@ -38,6 +38,83 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
     });
   }
 
+  IconData getCategoryIcon(String categoryName) {
+    switch (categoryName) {
+      case '예식장':
+        // return Icons.location_city_rounded;
+        return Icons.celebration_rounded;
+
+      case '스드메':
+        return Icons.checkroom_rounded;
+
+      case '스냅/영상':
+        return Icons.photo_camera_rounded;
+
+      case '맞춤정장':
+        // return Icons.business_center_rounded;
+        return Icons.man_rounded;
+
+      case '예물':
+        return Icons.diamond_rounded;
+
+      case '신혼여행':
+        return Icons.flight_rounded;
+
+      case '가전':
+        // return Icons.tv_rounded;
+        return Icons.kitchen_rounded;
+
+      case '가구':
+        return Icons.chair_rounded;
+
+      case '생활용품':
+        return Icons.home_rounded;
+
+      case '기타':
+        return Icons.receipt_long_rounded;
+
+      default:
+        return Icons.receipt_long_rounded;
+    }
+  }
+
+  Color getCategoryColor(String categoryName) {
+    switch (categoryName) {
+      case '예식장':
+        return Colors.pink;
+
+      case '스드메':
+        return Colors.purple;
+
+      case '스냅/영상':
+        return Colors.teal;
+
+      case '맞춤정장':
+        return Colors.indigo;
+
+      case '예물':
+        return Colors.amber;
+
+      case '신혼여행':
+        return Colors.lightBlue;
+
+      case '가전':
+        return Colors.orange;
+
+      case '가구':
+        return Colors.brown;
+
+      case '생활용품':
+        return Colors.green;
+
+      case '기타':
+        return Colors.grey;
+
+      default:
+        return Colors.grey;
+    }
+  }
+
   Future<void> showAddCategoryDialog() async {
     final controller = TextEditingController();
 
@@ -238,77 +315,148 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Scaffold(
-      appBar: AppBar(title: const Text('카테고리 관리'), centerTitle: true),
+      appBar: AppBar(
+        //title: const Text('카테고리 관리'),
+        scrolledUnderElevation: 0,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        surfaceTintColor: Colors.transparent,
+      ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
-          : ListView(
+          : Padding(
               padding: const EdgeInsets.all(20),
-              children: [
-                const Text(
-                  '지출 카테고리',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                ),
-
-                const SizedBox(height: 8),
-
-                Text(
-                  '지출을 등록할 때 사용할 카테고리를 관리할 수 있어요.',
-                  style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
-                ),
-
-                const SizedBox(height: 20),
-
-                Card(
-                  child: Column(
-                    children: [
-                      ...categories.map((category) {
-                        return ListTile(
-                          leading: CircleAvatar(
-                            backgroundColor: Theme.of(
-                              context,
-                            ).colorScheme.primaryContainer,
-                            child: Icon(
-                              Icons.folder_rounded,
-                              color: Theme.of(context).colorScheme.primary,
-                            ),
-                          ),
-                          title: Text(
-                            category.name,
-                            style: const TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                          trailing: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              IconButton(
-                                onPressed: () {
-                                  showEditCategoryDialog(category);
-                                },
-                                icon: const Icon(Icons.edit_rounded),
-                                tooltip: '카테고리 수정',
-                              ),
-                              IconButton(
-                                onPressed: () {
-                                  deleteCategory(category);
-                                },
-                                icon: const Icon(Icons.delete_outline_rounded),
-                                tooltip: '카테고리 삭제',
-                              ),
-                            ],
-                          ),
-                        );
-                      }),
-                    ],
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    '카테고리 관리',
+                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                   ),
-                ),
-              ],
-            ),
 
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: showAddCategoryDialog,
-        icon: const Icon(Icons.add_rounded),
-        label: const Text('카테고리 추가'),
-      ),
+                  const SizedBox(height: 2),
+
+                  Text(
+                    '지출을 등록할 때 사용할 카테고리를 관리할 수 있어요.',
+                    style: TextStyle(
+                      fontSize: 15,
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+
+                  const SizedBox(height: 4),
+
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton.icon(
+                      onPressed: showAddCategoryDialog,
+                      icon: const Icon(Icons.add_rounded, size: 20),
+                      label: const Text('카테고리 추가'),
+                    ),
+                  ),
+
+                  // 카테고리 목록 영역만 스크롤
+                  Expanded(
+                    child: ListView(
+                      children: [
+                        ...categories.asMap().entries.map((entry) {
+                          final index = entry.key;
+                          final category = entry.value;
+                          final isLast = index == categories.length - 1;
+
+                          final categoryColor = getCategoryColor(category.name);
+
+                          return Column(
+                            children: [
+                              ListTile(
+                                contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: 18,
+                                ),
+                                leading: Container(
+                                  width: 42,
+                                  height: 42,
+                                  decoration: BoxDecoration(
+                                    color: categoryColor.withValues(
+                                      alpha: 0.12,
+                                    ),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Icon(
+                                    getCategoryIcon(category.name),
+                                    color: categoryColor,
+                                    size: 21,
+                                  ),
+                                ),
+                                title: Text(
+                                  category.name,
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                trailing: PopupMenuButton<String>(
+                                  icon: const Icon(Icons.more_horiz_rounded),
+                                  onSelected: (value) {
+                                    if (value == 'edit') {
+                                      showEditCategoryDialog(category);
+                                    } else if (value == 'delete') {
+                                      deleteCategory(category);
+                                    }
+                                  },
+                                  itemBuilder: (context) => [
+                                    const PopupMenuItem(
+                                      value: 'edit',
+                                      child: Row(
+                                        children: [
+                                          Icon(Icons.edit_rounded, size: 20),
+                                          SizedBox(width: 12),
+                                          Text('수정'),
+                                        ],
+                                      ),
+                                    ),
+                                    PopupMenuItem(
+                                      value: 'delete',
+                                      child: Row(
+                                        children: [
+                                          Icon(
+                                            Icons.delete_outline_rounded,
+                                            size: 20,
+                                            color: colorScheme.error,
+                                          ),
+                                          const SizedBox(width: 12),
+                                          Text(
+                                            '삭제',
+                                            style: TextStyle(
+                                              color: colorScheme.error,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+
+                              if (!isLast)
+                                Divider(
+                                  height: 1,
+                                  indent: 78,
+                                  endIndent: 18,
+                                  color: colorScheme.outlineVariant.withValues(
+                                    alpha: 0.5,
+                                  ),
+                                ),
+                            ],
+                          );
+                        }),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
     );
   }
 }
