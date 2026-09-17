@@ -223,7 +223,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 loadData();
               }
             },
-            icon: const Icon(Icons.settings_rounded),
+            icon: const Icon(Icons.settings_outlined),
             tooltip: '설정',
           ),
         ],
