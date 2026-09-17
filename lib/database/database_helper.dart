@@ -142,6 +142,18 @@ class DatabaseHelper {
     return await db.delete('categories', where: 'id = ?', whereArgs: [id]);
   }
 
+  // 사용중인 카테고리 조회
+  Future<int> getExpenseCountByCategory(int categoryId) async {
+    final db = await database;
+
+    final result = await db.rawQuery(
+      'SELECT COUNT(*) AS count FROM expenses WHERE categoryId = ?',
+      [categoryId],
+    );
+
+    return result.first['count'] as int;
+  }
+
   // ========================================================= expenses =========================================================
   // 지출 전체 조회
   Future<List<Expense>> getExpenses() async {

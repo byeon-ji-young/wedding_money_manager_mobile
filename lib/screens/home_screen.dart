@@ -8,6 +8,7 @@ import '../models/settings.dart';
 import 'expense_register_screen.dart';
 import 'expense_list_screen.dart';
 import 'statistics_screen.dart';
+import 'category_management_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -204,6 +205,19 @@ class _HomeScreenState extends State<HomeScreen> {
             },
             icon: const Icon(Icons.bar_chart_rounded),
             tooltip: '지출 통계',
+          ),
+
+          IconButton(
+            onPressed: () async {
+              await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const CategoryManagementScreen(),
+                ),
+              );
+            },
+            icon: const Icon(Icons.category_rounded),
+            tooltip: '카테고리 관리',
           ),
         ],
       ),
