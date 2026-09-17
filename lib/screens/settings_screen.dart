@@ -1,0 +1,204 @@
+import 'package:flutter/material.dart';
+
+import '../database/database_helper.dart';
+import '../models/settings.dart';
+import 'category_management_screen.dart';
+
+class SettingsScreen extends StatefulWidget {
+  const SettingsScreen({super.key});
+
+  @override
+  State<SettingsScreen> createState() => _SettingsScreenState();
+}
+
+class _SettingsScreenState extends State<SettingsScreen> {
+  int? budget;
+
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+
+    loadBudget();
+  }
+
+  // 예산 조회
+  Future<void> loadBudget() async {
+    final result = await DatabaseHelper.instance.getBudget();
+
+    if (!mounted) {
+      return;
+    }
+
+    setState(() {
+      budget = result;
+      isLoading = false;
+    });
+  }
+
+  // 금액에 콤마 표시
+  String formatAmount(int amount) {
+    return amount.toString().replaceAllMapped(
+      RegExp(r'\B(?=(\d{3})+(?!\d))'),
+      (match) => ',',
+    );
+  }
+
+  // 예산 설정 다이얼로그
+  Future<void> showBudgetDialog() async {
+    final budgetController = TextEditingController(
+      text: budget?.toString() ?? '',
+    );
+
+    await showDialog(
+      context: context,
+      builder: (context) {
+        String? errorMessage;
+
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              title: const Text('예산 설정 💕'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  TextField(
+                    controller: budgetController,
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(
+                      hintText: '예산을 입력해주세요',
+                      suffixText: '원',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+
+                  if (errorMessage != null) ...[
+                    const SizedBox(height: 8),
+                    Text(
+                      errorMessage!,
+                      style: const TextStyle(color: Colors.red, fontSize: 13),
+                    ),
+                  ],
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: const Text('취소'),
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    final value = int.tryParse(budgetController.text);
+
+                    if (value == null || value <= 0) {
+                      setDialogState(() {
+                        errorMessage = '올바른 금액을 입력해주세요.';
+                      });
+                      return;
+                    }
+
+                    if (budget == null) {
+                      await DatabaseHelper.instance.insertSetting(
+                        Settings(key: 'budget', value: value.toString()),
+                      );
+                    } else {
+                      final setting = await DatabaseHelper.instance.getSetting(
+                        'budget',
+                      );
+
+                      if (setting != null) {
+                        await DatabaseHelper.instance.updateSetting(
+                          Settings(
+                            id: setting.id,
+                            key: 'budget',
+                            value: value.toString(),
+                          ),
+                        );
+                      }
+                    }
+
+                    if (!context.mounted) {
+                      return;
+                    }
+
+                    Navigator.pop(context);
+                  },
+                  child: const Text('저장'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+
+    // 다이얼로그가 완전히 닫힌 다음 처리
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      budgetController.dispose();
+
+      if (mounted) {
+        loadBudget();
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('설정'), centerTitle: true),
+      body: isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : ListView(
+              padding: const EdgeInsets.all(20),
+              children: [
+                const Text(
+                  '관리',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+
+                const SizedBox(height: 12),
+
+                // 예산 설정
+                Card(
+                  child: ListTile(
+                    leading: const Icon(Icons.account_balance_wallet_rounded),
+                    title: const Text('예산 설정'),
+                    subtitle: Text(
+                      budget == null
+                          ? '아직 예산이 설정되지 않았어요.'
+                          : '현재 ${formatAmount(budget!)}원',
+                    ),
+                    trailing: const Icon(Icons.chevron_right_rounded),
+                    onTap: showBudgetDialog,
+                  ),
+                ),
+
+                const SizedBox(height: 12),
+
+                // 카테고리 관리
+                Card(
+                  child: ListTile(
+                    leading: const Icon(Icons.category_rounded),
+                    title: const Text('카테고리 관리'),
+                    subtitle: const Text('지출 카테고리를 추가하거나 수정할 수 있어요.'),
+                    trailing: const Icon(Icons.chevron_right_rounded),
+                    onTap: () async {
+                      await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              const CategoryManagementScreen(),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+    );
+  }
+}
