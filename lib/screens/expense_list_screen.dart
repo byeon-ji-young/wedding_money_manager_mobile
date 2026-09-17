@@ -4,6 +4,8 @@ import '../database/database_helper.dart';
 
 import '../models/expense_with_category.dart';
 
+import '../utils/category_utils.dart';
+
 import 'expense_register_screen.dart';
 
 class ExpenseListScreen extends StatefulWidget {
@@ -46,46 +48,6 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
       RegExp(r'\B(?=(\d{3})+(?!\d))'),
       (match) => ',',
     );
-  }
-
-  IconData getCategoryIcon(String categoryName) {
-    switch (categoryName) {
-      case '예식장':
-        // return Icons.location_city_rounded;
-        return Icons.celebration_rounded;
-
-      case '스드메':
-        return Icons.checkroom_rounded;
-
-      case '스냅/영상':
-        return Icons.photo_camera_rounded;
-
-      case '맞춤정장':
-        // return Icons.business_center_rounded;
-        return Icons.man_rounded;
-
-      case '예물':
-        return Icons.diamond_rounded;
-
-      case '신혼여행':
-        return Icons.flight_rounded;
-
-      case '가전':
-        // return Icons.tv_rounded;
-        return Icons.kitchen_rounded;
-
-      case '가구':
-        return Icons.chair_rounded;
-
-      case '생활용품':
-        return Icons.home_rounded;
-
-      case '기타':
-        return Icons.receipt_long_rounded;
-
-      default:
-        return Icons.receipt_long_rounded;
-    }
   }
 
   @override
@@ -134,7 +96,20 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
                       // 수정 후 목록 다시 불러오기
                       loadExpenses();
                     },
-                    leading: Icon(getCategoryIcon(expense.categoryName)),
+                    leading: Container(
+                      width: 42,
+                      height: 42,
+                      decoration: BoxDecoration(
+                        color: getCategoryColor(
+                          expense.categoryName,
+                        ).withValues(alpha: 0.12),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        getCategoryIcon(expense.categoryName),
+                        color: getCategoryColor(expense.categoryName),
+                      ),
+                    ),
                     title: Text(
                       expense.categoryName,
                       style: const TextStyle(fontWeight: FontWeight.bold),

@@ -5,6 +5,8 @@ import '../database/database_helper.dart';
 import '../models/expense_with_category.dart';
 import '../models/settings.dart';
 
+import '../utils/category_utils.dart';
+
 import 'expense_register_screen.dart';
 import 'expense_list_screen.dart';
 import 'statistics_screen.dart';
@@ -548,16 +550,16 @@ class _HomeScreenState extends State<HomeScreen> {
                                       width: 42,
                                       height: 42,
                                       decoration: BoxDecoration(
-                                        color: Theme.of(
-                                          context,
-                                        ).colorScheme.primaryContainer,
+                                        color: getCategoryColor(
+                                          expense.categoryName,
+                                        ).withValues(alpha: 0.12),
                                         shape: BoxShape.circle,
                                       ),
                                       child: Icon(
-                                        Icons.receipt_long_rounded,
-                                        color: Theme.of(
-                                          context,
-                                        ).colorScheme.primary,
+                                        getCategoryIcon(expense.categoryName),
+                                        color: getCategoryColor(
+                                          expense.categoryName,
+                                        ),
                                       ),
                                     ),
                                     title: Text(
