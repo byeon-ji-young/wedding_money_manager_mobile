@@ -45,6 +45,29 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
+  // 설정 섹션
+  Widget buildSection({required String title, required List<Widget> children}) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(left: 4, bottom: 8),
+          child: Text(
+            title,
+            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+          ),
+        ),
+        Card(
+          margin: EdgeInsets.zero,
+          elevation: 0,
+          clipBehavior: Clip
+              .antiAlias, //  Clip.antiAlias는 위젯의 영역 밖으로 삐져나오는 부분을 잘라내되, 경계선을 부드럽게 처리하라는 의미
+          child: Column(children: children),
+        ),
+      ],
+    );
+  }
+
   // 설정 메뉴 아이콘
   Widget buildMenuIcon({required IconData icon, bool isDanger = false}) {
     final colorScheme = Theme.of(context).colorScheme;
@@ -103,7 +126,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                 )
-              : const Icon(Icons.chevron_right_rounded, size: 22),
+              : const Icon(
+                  Icons.chevron_right_rounded,
+                  // size: 22,
+                  color: Colors.grey,
+                ),
           onTap: onTap,
         ),
         if (showDivider)
@@ -115,29 +142,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
               context,
             ).colorScheme.outlineVariant.withValues(alpha: 0.5),
           ),
-      ],
-    );
-  }
-
-  // 설정 섹션
-  Widget buildSection({required String title, required List<Widget> children}) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(left: 4, bottom: 10),
-          child: Text(
-            title,
-            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
-          ),
-        ),
-        Card(
-          margin: EdgeInsets.zero,
-          elevation: 0,
-          clipBehavior: Clip
-              .antiAlias, //  Clip.antiAlias는 위젯의 영역 밖으로 삐져나오는 부분을 잘라내되, 경계선을 부드럽게 처리하라는 의미
-          child: Column(children: children),
-        ),
       ],
     );
   }
@@ -342,14 +346,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('설정'), centerTitle: true),
+      appBar: AppBar(
+        title: const Text(
+          '설정',
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+        ),
+        centerTitle: true,
+      ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : ListView(
-              padding: const EdgeInsets.fromLTRB(20, 24, 20, 32),
+              padding: const EdgeInsets.all(16),
               children: [
                 buildSection(
-                  title: '관리',
+                  title: '데이터 관리',
                   children: [
                     buildSettingTile(
                       icon: Icons.account_balance_wallet_rounded,
@@ -376,7 +386,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ],
                 ),
 
-                const SizedBox(height: 28),
+                const SizedBox(height: 24),
 
                 buildSection(
                   title: '앱 정보',
