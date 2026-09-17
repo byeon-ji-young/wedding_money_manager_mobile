@@ -45,6 +45,110 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
+  // 설정 메뉴 아이콘
+  Widget buildMenuIcon({required IconData icon, bool isDanger = false}) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    final color = isDanger ? colorScheme.error : colorScheme.primary;
+
+    final backgroundColor = isDanger
+        ? colorScheme.errorContainer
+        : colorScheme.primaryContainer;
+
+    return Container(
+      width: 42,
+      height: 42,
+      decoration: BoxDecoration(color: backgroundColor, shape: BoxShape.circle),
+      child: Icon(icon, color: color, size: 21),
+    );
+  }
+
+  // 설정 메뉴 하나
+  Widget buildSettingTile({
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required VoidCallback onTap,
+    bool isDanger = false,
+    bool showDivider = true,
+    String? trailingText,
+  }) {
+    return Column(
+      children: [
+        ListTile(
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 18,
+            vertical: 2,
+          ),
+          leading: buildMenuIcon(icon: icon, isDanger: isDanger),
+          title: Text(
+            title,
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+          ),
+          subtitle: Padding(
+            padding: const EdgeInsets.only(top: 4),
+            child: Text(
+              subtitle,
+              style: TextStyle(
+                fontSize: 13,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ),
+          trailing: trailingText != null
+              ? Text(
+                  trailingText,
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                )
+              : const Icon(Icons.chevron_right_rounded, size: 22),
+          onTap: onTap,
+        ),
+        if (showDivider)
+          Divider(
+            height: 1,
+            indent: 78,
+            endIndent: 18,
+            color: Theme.of(
+              context,
+            ).colorScheme.outlineVariant.withValues(alpha: 0.5),
+          ),
+      ],
+    );
+  }
+
+  // 설정 섹션
+  Widget buildSection({required String title, required List<Widget> children}) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(left: 4, bottom: 10),
+          child: Text(
+            title,
+            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+          ),
+        ),
+        Card(
+          margin: EdgeInsets.zero,
+          elevation: 0,
+          clipBehavior: Clip
+              .antiAlias, //  Clip.antiAlias는 위젯의 영역 밖으로 삐져나오는 부분을 잘라내되, 경계선을 부드럽게 처리하라는 의미
+          child: Column(children: children),
+        ),
+      ],
+    );
+  }
+
+  Future<void> openCategoryManagement() async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const CategoryManagementScreen()),
+    );
+  }
+
   // 예산 설정 다이얼로그
   Future<void> showBudgetDialog() async {
     final budgetController = TextEditingController(
@@ -58,19 +162,56 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
         return StatefulBuilder(
           builder: (context, setDialogState) {
+            final colorScheme = Theme.of(context).colorScheme;
+
             return AlertDialog(
-              title: const Text('예산 설정 💕'),
+              title: const Text(
+                '예산 설정',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  Text(
+                    '결혼 준비에 사용할 전체 예산을 설정해주세요.',
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+
                   TextField(
                     controller: budgetController,
                     keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(
-                      hintText: '예산을 입력해주세요',
+                    autofocus: true,
+                    decoration: InputDecoration(
+                      hintText: '예: 50,000,000',
                       suffixText: '원',
-                      border: OutlineInputBorder(),
+                      filled: true,
+                      fillColor: colorScheme.surfaceContainerHighest.withValues(
+                        alpha: 0.5,
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(14),
+                        borderSide: BorderSide.none,
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(14),
+                        borderSide: BorderSide.none,
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(14),
+                        borderSide: BorderSide(
+                          color: colorScheme.secondary,
+                          width: 1.5,
+                        ),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 16,
+                      ),
                     ),
                   ),
 
@@ -78,11 +219,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     const SizedBox(height: 8),
                     Text(
                       errorMessage!,
-                      style: const TextStyle(color: Colors.red, fontSize: 13),
+                      style: TextStyle(color: colorScheme.error, fontSize: 13),
                     ),
                   ],
                 ],
               ),
+              actionsPadding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
               actions: [
                 TextButton(
                   onPressed: () {
@@ -90,7 +232,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   },
                   child: const Text('취소'),
                 ),
-                ElevatedButton(
+                TextButton(
                   onPressed: () async {
                     final value = int.tryParse(budgetController.text);
 
@@ -152,7 +294,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('전체 데이터 초기화'),
+          // title: const Text('전체 데이터 초기화'),
           content: const Text(
             '모든 지출 내역과 예산 설정이 삭제됩니다.\n'
             '추가한 카테고리도 삭제되고 기본 카테고리만 남습니다.\n\n'
@@ -165,7 +307,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               },
               child: const Text('취소'),
             ),
-            ElevatedButton(
+            TextButton(
               onPressed: () {
                 Navigator.pop(context, true);
               },
@@ -184,12 +326,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
     // 데이터 초기화
     await DatabaseHelper.instance.clearAllData();
 
+    // 설정 화면의 예산 정보 새로고침
+    await loadBudget();
+
+    // 다이얼로그가 닫힌 후에도 화면이 존재하는지 확인
     if (!mounted) {
       return;
     }
-
-    // 설정 화면의 예산 정보 새로고침
-    await loadBudget();
 
     ScaffoldMessenger.of(
       context,
@@ -203,61 +346,63 @@ class _SettingsScreenState extends State<SettingsScreen> {
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : ListView(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.fromLTRB(20, 24, 20, 32),
               children: [
-                const Text(
-                  '관리',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                ),
-
-                const SizedBox(height: 12),
-
-                // 예산 설정
-                Card(
-                  child: ListTile(
-                    leading: const Icon(Icons.account_balance_wallet_rounded),
-                    title: const Text('예산 설정'),
-                    subtitle: Text(
-                      budget == null
+                buildSection(
+                  title: '관리',
+                  children: [
+                    buildSettingTile(
+                      icon: Icons.account_balance_wallet_rounded,
+                      title: '예산 설정',
+                      subtitle: budget == null
                           ? '아직 예산이 설정되지 않았어요.'
-                          : '현재 ${formatAmount(budget!)}원',
+                          : '${formatAmount(budget!)}원',
+                      onTap: showBudgetDialog,
                     ),
-                    trailing: const Icon(Icons.chevron_right_rounded),
-                    onTap: showBudgetDialog,
-                  ),
+                    buildSettingTile(
+                      icon: Icons.category_rounded,
+                      title: '카테고리 관리',
+                      subtitle: '지출 카테고리를 추가하거나 수정할 수 있어요.',
+                      onTap: openCategoryManagement,
+                    ),
+                    buildSettingTile(
+                      icon: Icons.delete_forever_rounded,
+                      title: '전체 데이터 초기화',
+                      subtitle: '모든 지출 내역과 설정을 삭제해요.',
+                      onTap: resetAllData,
+                      isDanger: true,
+                      showDivider: false,
+                    ),
+                  ],
                 ),
 
-                const SizedBox(height: 12),
+                const SizedBox(height: 28),
 
-                // 카테고리 관리
-                Card(
-                  child: ListTile(
-                    leading: const Icon(Icons.category_rounded),
-                    title: const Text('카테고리 관리'),
-                    subtitle: const Text('지출 카테고리를 추가하거나 수정할 수 있어요.'),
-                    trailing: const Icon(Icons.chevron_right_rounded),
-                    onTap: () async {
-                      await Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) =>
-                              const CategoryManagementScreen(),
+                buildSection(
+                  title: '앱 정보',
+                  children: [
+                    ListTile(
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 18,
+                        vertical: 2,
+                      ),
+                      leading: buildMenuIcon(icon: Icons.info_outline_rounded),
+                      title: const Text(
+                        '앱 정보',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
                         ),
-                      );
-                    },
-                  ),
-                ),
-
-                const SizedBox(height: 12),
-
-                Card(
-                  child: ListTile(
-                    leading: const Icon(Icons.delete_forever_rounded),
-                    title: const Text('전체 데이터 초기화'),
-                    subtitle: const Text('모든 지출 내역과 설정을 삭제합니다.'),
-                    trailing: const Icon(Icons.chevron_right_rounded),
-                    onTap: resetAllData,
-                  ),
+                      ),
+                      trailing: Text(
+                        'ver 1.0.0',
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
