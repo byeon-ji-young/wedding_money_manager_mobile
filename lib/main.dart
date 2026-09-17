@@ -20,7 +20,10 @@ class WeddingMoneyManagerApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: '결혼자금관리',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.pink),
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color.fromARGB(255, 232, 180, 200), // #E8B4C8
+          // seedColor: const Color.fromARGB(255, 243, 203, 215), // #F3CBD7
+        ),
         useMaterial3: true,
         // textTheme: GoogleFonts.ibmPlexSansKrTextTheme(),
         textTheme: GoogleFonts.juaTextTheme(),
