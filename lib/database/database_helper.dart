@@ -86,6 +86,12 @@ class DatabaseHelper {
     ''');
 
     // 4. 기본 카테고리 등록
+    await _insertDefaultCategories(db);
+  }
+
+  // ========================================================= categories =========================================================
+  // 기본 카테고리 생성
+  Future<void> _insertDefaultCategories(Database db) async {
     final now = DateTime.now().toIso8601String();
 
     final defaultCategories = [
@@ -106,7 +112,6 @@ class DatabaseHelper {
     }
   }
 
-  // ========================================================= categories =========================================================
   // 카테고리 전체 조회
   Future<List<Category>> getCategories() async {
     final db = await database;
@@ -411,5 +416,23 @@ class DatabaseHelper {
     }
 
     return int.tryParse(setting.value);
+  }
+
+  // ========================================================= backup =========================================================
+  // 전체 데이터 초기화
+  Future<void> clearAllData() async {
+    final db = await database;
+
+    // 지출 데이터 삭제
+    await db.delete('expenses');
+
+    // 사용자 설정 삭제
+    await db.delete('settings');
+
+    // 카테고리 삭제
+    await db.delete('categories');
+
+    // 기본 카테고리 다시 생성
+    await _insertDefaultCategories(db);
   }
 }

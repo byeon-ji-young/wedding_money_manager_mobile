@@ -146,6 +146,56 @@ class _SettingsScreenState extends State<SettingsScreen> {
     });
   }
 
+  // 전체 데이터 초기화
+  Future<void> resetAllData() async {
+    final shouldReset = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('전체 데이터 초기화'),
+          content: const Text(
+            '모든 지출 내역과 예산 설정이 삭제됩니다.\n'
+            '추가한 카테고리도 삭제되고 기본 카테고리만 남습니다.\n\n'
+            '정말 초기화하시겠어요?',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context, false);
+              },
+              child: const Text('취소'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(context, true);
+              },
+              child: const Text('초기화'),
+            ),
+          ],
+        );
+      },
+    );
+
+    // 초기화를 취소한 경우
+    if (shouldReset != true) {
+      return;
+    }
+
+    // 데이터 초기화
+    await DatabaseHelper.instance.clearAllData();
+
+    if (!mounted) {
+      return;
+    }
+
+    // 설정 화면의 예산 정보 새로고침
+    await loadBudget();
+
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('모든 데이터가 초기화되었습니다.')));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -195,6 +245,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         ),
                       );
                     },
+                  ),
+                ),
+
+                const SizedBox(height: 12),
+
+                Card(
+                  child: ListTile(
+                    leading: const Icon(Icons.delete_forever_rounded),
+                    title: const Text('전체 데이터 초기화'),
+                    subtitle: const Text('모든 지출 내역과 설정을 삭제합니다.'),
+                    trailing: const Icon(Icons.chevron_right_rounded),
+                    onTap: resetAllData,
                   ),
                 ),
               ],
