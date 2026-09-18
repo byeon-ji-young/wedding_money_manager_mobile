@@ -192,6 +192,10 @@ class _HomeScreenState extends State<HomeScreen> {
         ? null
         : totalExpense / budget! * 100;
 
+    final borderColor = Theme.of(
+      context,
+    ).colorScheme.outlineVariant.withValues(alpha: 0.5);
+
     return Scaffold(
       appBar: AppBar(
         // title: const Text('우리의 결혼자금'),
@@ -245,11 +249,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       decoration: BoxDecoration(
                         color: Theme.of(context).colorScheme.surface,
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: Theme.of(
-                            context,
-                          ).colorScheme.outlineVariant.withValues(alpha: 0.5),
-                        ),
+                        border: Border.all(color: borderColor),
                       ),
                       child: Column(
                         children: [
@@ -414,9 +414,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
                           Divider(
                             height: 1,
-                            color: Theme.of(
-                              context,
-                            ).colorScheme.outlineVariant.withValues(alpha: 0.5),
+                            color: borderColor,
                             // height: 1,
                           ),
 
@@ -547,11 +545,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         decoration: BoxDecoration(
                           color: Theme.of(context).colorScheme.surface,
                           borderRadius: BorderRadius.circular(20),
-                          border: Border.all(
-                            color: Theme.of(
-                              context,
-                            ).colorScheme.outlineVariant.withValues(alpha: 0.5),
-                          ),
+                          border: Border.all(color: borderColor),
                         ),
                         child: const Center(
                           child: Text(
@@ -564,13 +558,9 @@ class _HomeScreenState extends State<HomeScreen> {
                       Container(
                         width: double.infinity,
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: Theme.of(context).colorScheme.surface,
                           borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: Theme.of(
-                              context,
-                            ).colorScheme.outlineVariant.withValues(alpha: 0.5),
-                          ),
+                          // border: Border.all(color: borderColor),
                         ),
                         child: Column(
                           children: [
@@ -581,9 +571,34 @@ class _HomeScreenState extends State<HomeScreen> {
                               return Column(
                                 children: [
                                   ListTile(
+                                    onTap: () async {
+                                      if (expense.id == null) {
+                                        return;
+                                      }
+
+                                      final result = await DatabaseHelper
+                                          .instance
+                                          .getExpenseById(expense.id!);
+
+                                      if (result == null || !context.mounted) {
+                                        return;
+                                      }
+
+                                      await Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              ExpenseRegisterScreen(
+                                                expense: result,
+                                              ),
+                                        ),
+                                      );
+
+                                      loadData();
+                                    },
                                     contentPadding: const EdgeInsets.symmetric(
-                                      horizontal: 20,
-                                      vertical: 4,
+                                      horizontal: 18,
+                                      // vertical: 4,
                                     ),
                                     leading: Container(
                                       width: 42,
@@ -613,11 +628,23 @@ class _HomeScreenState extends State<HomeScreen> {
                                       '${expense.date.month}.'
                                       '${expense.date.day}',
                                     ),
-                                    trailing: Text(
-                                      '${formatAmount(expense.amount)}원',
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                      ),
+                                    trailing: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text(
+                                          '${formatAmount(expense.amount)}원',
+                                          style: const TextStyle(
+                                            fontSize: 15,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 5),
+                                        Icon(
+                                          Icons.chevron_right,
+                                          size: 22,
+                                          color: Colors.grey,
+                                        ),
+                                      ],
                                     ),
                                   ),
 
