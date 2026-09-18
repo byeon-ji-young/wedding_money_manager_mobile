@@ -244,7 +244,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       padding: EdgeInsets.all(24),
                       decoration: BoxDecoration(
                         color: Theme.of(context).colorScheme.surface,
-                        borderRadius: BorderRadius.circular(24),
+                        borderRadius: BorderRadius.circular(12),
                         border: Border.all(
                           color: Theme.of(
                             context,
@@ -497,8 +497,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     // 최근 지출
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        // 최근 지출 + 전체 건수
+                        // 최근 지출
                         Row(
                           children: [
                             const Text(
@@ -508,9 +509,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-
-                            const SizedBox(width: 8),
-
+                            const SizedBox(width: 10),
                             Text(
                               '총 $expenseCount건',
                               style: TextStyle(
@@ -521,29 +520,30 @@ class _HomeScreenState extends State<HomeScreen> {
                           ],
                         ),
 
-                        // 지출이 5건을 초과하면 전체보기 표시
-                        if (expenseCount > 5)
-                          TextButton(
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      const ExpenseListScreen(),
-                                ),
-                              );
-                            },
-                            child: const Text('전체보기'),
-                          ),
+                        // 지출 추가
+                        TextButton.icon(
+                          onPressed: () async {
+                            await Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    const ExpenseRegisterScreen(),
+                              ),
+                            );
+
+                            // 등록 화면에서 돌아오면 홈 데이터 다시 불러오기
+                            loadData();
+                          },
+                          icon: const Icon(Icons.add_rounded, size: 20),
+                          label: const Text('지출 추가'),
+                        ),
                       ],
                     ),
-
-                    const SizedBox(height: 5),
 
                     if (recentExpenses.isEmpty)
                       Container(
                         width: double.infinity,
-                        padding: const EdgeInsets.all(24),
+                        padding: const EdgeInsets.all(20),
                         decoration: BoxDecoration(
                           color: Theme.of(context).colorScheme.surface,
                           borderRadius: BorderRadius.circular(20),
@@ -565,7 +565,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         width: double.infinity,
                         decoration: BoxDecoration(
                           color: Colors.white,
-                          borderRadius: BorderRadius.circular(20),
+                          borderRadius: BorderRadius.circular(12),
                           border: Border.all(
                             color: Theme.of(
                               context,
@@ -634,47 +634,54 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ],
                               );
                             }),
+
+                            // 전체보기
+                            if (expenseCount > 5) ...[
+                              Divider(
+                                height: 1,
+                                indent: 20,
+                                endIndent: 20,
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .outlineVariant
+                                    .withValues(alpha: 0.5),
+                              ),
+
+                              Align(
+                                alignment: Alignment.centerRight,
+                                child: TextButton(
+                                  onPressed: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            const ExpenseListScreen(),
+                                      ),
+                                    );
+                                  },
+                                  child: const Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text('전체보기'),
+                                      SizedBox(width: 2),
+                                      Icon(
+                                        Icons.chevron_right_rounded,
+                                        size: 20,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
                           ],
                         ),
                       ),
+
+                    const SizedBox(height: 30),
                   ],
                 ),
               ),
             ),
-
-      // 하단 지출 등록 버튼
-      bottomNavigationBar: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(20, 8, 20, 12),
-          child: SizedBox(
-            width: double.infinity,
-            height: 56,
-            child: ElevatedButton.icon(
-              onPressed: () async {
-                await Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const ExpenseRegisterScreen(),
-                  ),
-                );
-
-                // 등록 화면에서 돌아오면 홈 데이터 다시 불러오기
-                loadData();
-              },
-              icon: const Icon(Icons.add_rounded, size: 24),
-              label: const Text(
-                '지출 추가',
-                style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
-              ),
-              style: ElevatedButton.styleFrom(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
     );
   }
 }

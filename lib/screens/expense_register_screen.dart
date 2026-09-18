@@ -232,14 +232,13 @@ class _ExpenseRegisterScreenState extends State<ExpenseRegisterScreen> {
               ],
             ),
 
-            if (!isEditMode)
-              Text(
-                '지출 내역을 등록해 주세요.',
-                style: TextStyle(
-                  fontSize: 15,
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
+            Text(
+              isEditMode ? '지출 내역을 수정하거나 삭제할 수 있어요.' : '지출 내역을 등록해 주세요.',
+              style: TextStyle(
+                fontSize: 15,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
+            ),
 
             const SizedBox(height: 24),
 
