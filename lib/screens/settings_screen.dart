@@ -157,6 +157,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
+  // 데이터 백업
+  Future<void> backupData() async {
+    final path = await DatabaseHelper.instance.saveBackupFile();
+
+    if (!mounted) {
+      return;
+    }
+
+    // 파일이 저장된 경우에만 안내 메시지를 보여준다.
+    if (path != null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('백업 파일을 저장했어요.')));
+    }
+  }
+
   // 전체 데이터 초기화
   Future<void> resetAllData() async {
     final shouldReset = await showDialog<bool>(
@@ -272,6 +288,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       title: '카테고리 관리',
                       subtitle: '지출 카테고리를 추가하거나 수정할 수 있어요.',
                       onTap: openCategoryManagement,
+                    ),
+                    buildSettingTile(
+                      icon: Icons.backup_rounded,
+                      title: '데이터 백업',
+                      subtitle: '결혼자금 데이터를 파일로 저장해요.',
+                      onTap: backupData,
                     ),
                     buildSettingTile(
                       icon: Icons.delete_forever_rounded,

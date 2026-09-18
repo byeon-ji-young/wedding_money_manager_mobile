@@ -1,5 +1,8 @@
+import 'dart:convert';
+
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
+import 'package:file_picker/file_picker.dart';
 
 import '../models/category.dart';
 import '../models/expense.dart';
@@ -473,5 +476,51 @@ class DatabaseHelper {
 
     // 기본 카테고리 다시 생성
     await _insertDefaultCategories(db);
+  }
+
+  // 전체 데이터를 백업용 Map으로 변환
+  Future<Map<String, dynamic>> createBackupData() async {
+    final db = await database;
+
+    final categories = await db.query('categories');
+    final expenses = await db.query('expenses');
+    final settings = await db.query('settings');
+
+    return {
+      'version': 1,
+      'createdAt': DateTime.now().toIso8601String(),
+      'categories': categories,
+      'expenses': expenses,
+      'settings': settings,
+    };
+  }
+
+  // 전체 데이터를 JSON 문자열로 변환
+  Future<String> createBackupJson() async {
+    final backupData = await createBackupData();
+
+    return const JsonEncoder.withIndent('  ').convert(backupData);
+  }
+
+  // 백업 JSON을 파일로 저장
+  Future<Uri?> saveBackupFile() async {
+    final jsonString = await createBackupJson();
+
+    final fileName =
+        'wedding_money_backup_${DateTime.now().year}'
+        '${DateTime.now().month.toString().padLeft(2, '0')}'
+        '${DateTime.now().day.toString().padLeft(2, '0')}.json';
+
+    final bytes = utf8.encode(jsonString);
+
+    final path = await FilePicker.saveFile(
+      dialogTitle: '백업 파일 저장',
+      fileName: fileName,
+      type: FileType.custom,
+      allowedExtensions: ['json'],
+      bytes: bytes,
+    );
+
+    return path;
   }
 }
