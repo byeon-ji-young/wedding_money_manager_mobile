@@ -159,6 +159,63 @@ class DatabaseHelper {
     return result.first['count'] as int;
   }
 
+  // 카테고리별 지출 합계 조회
+  Future<List<Map<String, dynamic>>> getExpenseSummaryByCategory() async {
+    final db = await database;
+
+    final result = await db.rawQuery('''
+      SELECT
+        categories.id AS categoryId,
+        categories.name AS categoryName,
+        SUM(expenses.amount) AS totalAmount
+      FROM expenses
+      INNER JOIN categories
+        ON expenses.categoryId = categories.id
+      GROUP BY expenses.categoryId
+      ORDER BY totalAmount DESC
+    ''');
+
+    return result;
+  }
+
+  // 특정 카테고리의 지출 내역 조회
+  Future<List<ExpenseWithCategory>> getExpensesByCategory(
+    int categoryId,
+  ) async {
+    final db = await database;
+
+    final result = await db.rawQuery(
+      '''
+      SELECT
+        expenses.id,
+        expenses.amount,
+        expenses.date,
+        expenses.categoryId,
+        expenses.payer,
+        expenses.memo,
+        expenses.createdAt,
+        categories.name AS categoryName
+      FROM expenses
+      INNER JOIN categories
+        ON expenses.categoryId = categories.id
+      WHERE expenses.categoryId = ?
+      ORDER BY expenses.date DESC, expenses.id DESC
+      ''',
+      [categoryId],
+    );
+
+    return result.map((map) {
+      return ExpenseWithCategory(
+        id: map['id'] as int?,
+        amount: map['amount'] as int,
+        date: DateTime.parse(map['date'] as String),
+        categoryName: map['categoryName'] as String,
+        payer: map['payer'] as String,
+        memo: map['memo'] as String?,
+      );
+    }).toList();
+  }
+
   // ========================================================= expenses =========================================================
   // 지출 전체 조회
   Future<List<Expense>> getExpenses() async {
@@ -317,24 +374,6 @@ class DatabaseHelper {
     }
 
     return Expense.fromMap(result.first);
-  }
-
-  // 카테고리별 지출 합계 조회
-  Future<List<Map<String, dynamic>>> getExpenseSummaryByCategory() async {
-    final db = await database;
-
-    final result = await db.rawQuery('''
-      SELECT
-        categories.name AS categoryName,
-        SUM(expenses.amount) AS totalAmount
-      FROM expenses
-      INNER JOIN categories
-        ON expenses.categoryId = categories.id
-      GROUP BY expenses.categoryId
-      ORDER BY totalAmount DESC
-    ''');
-
-    return result;
   }
 
   // 월별 지출 합계 조회

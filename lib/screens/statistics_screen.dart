@@ -4,6 +4,8 @@ import '../database/database_helper.dart';
 
 import '../utils/category_utils.dart';
 
+import 'category_detail_screen.dart';
+
 class StatisticsScreen extends StatefulWidget {
   const StatisticsScreen({super.key});
 
@@ -260,86 +262,104 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
 
                           return Column(
                             children: [
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 18,
-                                  vertical: 8,
-                                ),
-                                child: Column(
-                                  children: [
-                                    Row(
-                                      children: [
-                                        Container(
-                                          width: 42,
-                                          height: 42,
-                                          decoration: BoxDecoration(
-                                            color: categoryColor.withValues(
-                                              alpha: 0.12,
+                              InkWell(
+                                onTap: () async {
+                                  final categoryId = item['categoryId'] as int;
+
+                                  await Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          CategoryDetailScreen(
+                                            categoryId: categoryId,
+                                            categoryName: categoryName,
+                                            totalAmount: totalAmount,
+                                          ),
+                                    ),
+                                  );
+
+                                  await loadStatistics();
+                                },
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 18,
+                                    vertical: 8,
+                                  ),
+                                  child: Column(
+                                    children: [
+                                      Row(
+                                        children: [
+                                          Container(
+                                            width: 42,
+                                            height: 42,
+                                            decoration: BoxDecoration(
+                                              color: categoryColor.withValues(
+                                                alpha: 0.12,
+                                              ),
+                                              shape: BoxShape.circle,
                                             ),
-                                            shape: BoxShape.circle,
+                                            child: Icon(
+                                              getCategoryIcon(categoryName),
+                                              color: categoryColor,
+                                              size: 21,
+                                            ),
                                           ),
-                                          child: Icon(
-                                            getCategoryIcon(categoryName),
-                                            color: categoryColor,
-                                            size: 21,
+
+                                          const SizedBox(width: 12),
+
+                                          Expanded(
+                                            child: Text(
+                                              categoryName,
+                                              style: const TextStyle(
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                            ),
                                           ),
-                                        ),
 
-                                        const SizedBox(width: 12),
-
-                                        Expanded(
-                                          child: Text(
-                                            categoryName,
+                                          Text(
+                                            '${formatAmount(totalAmount)}원',
                                             style: const TextStyle(
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.w600,
-                                            ),
-                                          ),
-                                        ),
-
-                                        Text(
-                                          '${formatAmount(totalAmount)}원',
-                                          style: const TextStyle(
-                                            fontSize: 15,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-
-                                    const SizedBox(height: 4),
-
-                                    Row(
-                                      children: [
-                                        Expanded(
-                                          child: ClipRRect(
-                                            borderRadius: BorderRadius.circular(
-                                              10,
-                                            ),
-                                            child: LinearProgressIndicator(
-                                              value: percentage,
-                                              minHeight: 7,
-                                            ),
-                                          ),
-                                        ),
-
-                                        const SizedBox(width: 10),
-
-                                        SizedBox(
-                                          width: 48,
-                                          child: Text(
-                                            '${(percentage * 100).toStringAsFixed(1)}%',
-                                            textAlign: TextAlign.right,
-                                            style: TextStyle(
-                                              fontSize: 13,
+                                              fontSize: 15,
                                               fontWeight: FontWeight.bold,
-                                              color: colorScheme.primary,
                                             ),
                                           ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
+                                        ],
+                                      ),
+
+                                      const SizedBox(height: 4),
+
+                                      Row(
+                                        children: [
+                                          Expanded(
+                                            child: ClipRRect(
+                                              borderRadius:
+                                                  BorderRadius.circular(10),
+                                              child: LinearProgressIndicator(
+                                                value: percentage,
+                                                minHeight: 7,
+                                              ),
+                                            ),
+                                          ),
+
+                                          const SizedBox(width: 10),
+
+                                          SizedBox(
+                                            width: 48,
+                                            child: Text(
+                                              '${(percentage * 100).toStringAsFixed(1)}%',
+                                              textAlign: TextAlign.right,
+                                              style: TextStyle(
+                                                fontSize: 13,
+                                                fontWeight: FontWeight.bold,
+                                                color: colorScheme.primary,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
 
