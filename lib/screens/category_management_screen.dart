@@ -40,6 +40,7 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
     });
   }
 
+  // 카테고리 등록 Dialog
   Future<void> showAddCategoryDialog() async {
     final controller = TextEditingController();
 
@@ -87,6 +88,7 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
       },
     );
 
+    // 다이얼로그가 완전히 닫힌 다음 처리
     WidgetsBinding.instance.addPostFrameCallback((_) {
       controller.dispose();
 
@@ -96,6 +98,7 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
     });
   }
 
+  // 카테고리 수정 Dialog
   Future<void> showEditCategoryDialog(Category category) async {
     final controller = TextEditingController(text: category.name);
 
@@ -147,6 +150,7 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
       }),
     );
 
+    // 다이얼로그가 완전히 닫힌 다음 처리
     WidgetsBinding.instance.addPostFrameCallback((_) {
       controller.dispose();
 

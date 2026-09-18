@@ -7,6 +7,8 @@ import '../models/settings.dart';
 
 import '../utils/category_utils.dart';
 
+import '../widgets/budget_dialog.dart';
+
 import 'expense_register_screen.dart';
 import 'expense_list_screen.dart';
 import 'statistics_screen.dart';
@@ -69,117 +71,6 @@ class _HomeScreenState extends State<HomeScreen> {
       RegExp(r'\B(?=(\d{3})+(?!\d))'),
       (match) => ',',
     );
-  }
-
-  // 예산 설정 Dialog
-  Future<void> showBudgetDialog() async {
-    // 예산을 입력받기 위한 컨트롤러
-    final budgetController = TextEditingController(
-      text: budget?.toString() ?? '',
-    );
-
-    await showDialog(
-      context: context,
-      builder: (context) {
-        // 에러 메시지
-        String? errorMessage;
-
-        return StatefulBuilder(
-          builder: (context, setDialogState) {
-            return AlertDialog(
-              title: const Text('예산 설정 💕'),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  TextField(
-                    controller: budgetController,
-                    keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(
-                      hintText: '예산을 입력해주세요',
-                      suffixText: '원',
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-
-                  // 에러 메시지
-                  if (errorMessage != null) ...[
-                    const SizedBox(height: 8),
-                    Text(
-                      errorMessage!,
-                      style: const TextStyle(color: Colors.red, fontSize: 13),
-                    ),
-                  ],
-                ],
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  child: const Text('취소'),
-                ),
-                ElevatedButton(
-                  onPressed: () async {
-                    // 입력한 예산을 숫자로 변환
-                    final value = int.tryParse(budgetController.text);
-
-                    // 잘못된 값이면 에러 메시지 표시
-                    if (value == null || value <= 0) {
-                      setDialogState(() {
-                        errorMessage = '올바른 금액을 입력해주세요.';
-                      });
-
-                      return;
-                    }
-
-                    // 기존 예산이 없는 경우
-                    if (budget == null) {
-                      await DatabaseHelper.instance.insertSetting(
-                        Settings(key: 'budget', value: value.toString()),
-                      );
-                    }
-                    // 기존 예산이 있는 경우
-                    else {
-                      final setting = await DatabaseHelper.instance.getSetting(
-                        'budget',
-                      );
-
-                      if (setting != null) {
-                        await DatabaseHelper.instance.updateSetting(
-                          Settings(
-                            id: setting.id,
-                            key: 'budget',
-                            value: value.toString(),
-                          ),
-                        );
-                      }
-                    }
-
-                    // 저장이 끝나면 Dialog 닫기
-                    if (!context.mounted) {
-                      return;
-                    }
-
-                    Navigator.pop(context);
-                  },
-                  child: const Text('저장'),
-                ),
-              ],
-            );
-          },
-        );
-      },
-    );
-
-    // Dialog가 완전히 닫힌 다음 컨트롤러 정리 및 홈 데이터 갱신
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      budgetController.dispose();
-
-      if (mounted) {
-        loadData();
-      }
-    });
   }
 
   @override
@@ -311,7 +202,46 @@ class _HomeScreenState extends State<HomeScreen> {
                                 const SizedBox(height: 6),
 
                                 InkWell(
-                                  onTap: showBudgetDialog,
+                                  onTap: () async {
+                                    final result = await showDialog<int>(
+                                      context: context,
+                                      builder: (context) =>
+                                          BudgetDialog(currentBudget: budget),
+                                    );
+
+                                    if (result == null) {
+                                      return;
+                                    }
+
+                                    final setting = await DatabaseHelper
+                                        .instance
+                                        .getSetting('budget');
+
+                                    if (setting == null) {
+                                      await DatabaseHelper.instance
+                                          .insertSetting(
+                                            Settings(
+                                              key: 'budget',
+                                              value: result.toString(),
+                                            ),
+                                          );
+                                    } else {
+                                      await DatabaseHelper.instance
+                                          .updateSetting(
+                                            Settings(
+                                              id: setting.id,
+                                              key: 'budget',
+                                              value: result.toString(),
+                                            ),
+                                          );
+                                    }
+
+                                    if (!mounted) {
+                                      return;
+                                    }
+
+                                    await loadData();
+                                  },
                                   borderRadius: BorderRadius.circular(8),
                                   child: Row(
                                     mainAxisSize: MainAxisSize.min,

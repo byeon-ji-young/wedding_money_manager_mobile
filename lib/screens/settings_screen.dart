@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 
 import '../database/database_helper.dart';
+
 import '../models/settings.dart';
+
+import '../widgets/budget_dialog.dart';
+
 import 'category_management_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -153,145 +157,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  // 예산 설정 다이얼로그
-  Future<void> showBudgetDialog() async {
-    final budgetController = TextEditingController(
-      text: budget?.toString() ?? '',
-    );
-
-    await showDialog(
-      context: context,
-      builder: (context) {
-        String? errorMessage;
-
-        return StatefulBuilder(
-          builder: (context, setDialogState) {
-            final colorScheme = Theme.of(context).colorScheme;
-
-            return AlertDialog(
-              title: const Text(
-                '예산 설정',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              ),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    '결혼 준비에 사용할 전체 예산을 설정해주세요.',
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-
-                  TextField(
-                    controller: budgetController,
-                    keyboardType: TextInputType.number,
-                    autofocus: true,
-                    decoration: InputDecoration(
-                      hintText: '예: 50,000,000',
-                      suffixText: '원',
-                      filled: true,
-                      fillColor: colorScheme.surfaceContainerHighest.withValues(
-                        alpha: 0.5,
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(14),
-                        borderSide: BorderSide.none,
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(14),
-                        borderSide: BorderSide.none,
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(14),
-                        borderSide: BorderSide(
-                          color: colorScheme.secondary,
-                          width: 1.5,
-                        ),
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 16,
-                      ),
-                    ),
-                  ),
-
-                  if (errorMessage != null) ...[
-                    const SizedBox(height: 8),
-                    Text(
-                      errorMessage!,
-                      style: TextStyle(color: colorScheme.error, fontSize: 13),
-                    ),
-                  ],
-                ],
-              ),
-              actionsPadding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  child: const Text('취소'),
-                ),
-                TextButton(
-                  onPressed: () async {
-                    final value = int.tryParse(budgetController.text);
-
-                    if (value == null || value <= 0) {
-                      setDialogState(() {
-                        errorMessage = '올바른 금액을 입력해주세요.';
-                      });
-                      return;
-                    }
-
-                    if (budget == null) {
-                      await DatabaseHelper.instance.insertSetting(
-                        Settings(key: 'budget', value: value.toString()),
-                      );
-                    } else {
-                      final setting = await DatabaseHelper.instance.getSetting(
-                        'budget',
-                      );
-
-                      if (setting != null) {
-                        await DatabaseHelper.instance.updateSetting(
-                          Settings(
-                            id: setting.id,
-                            key: 'budget',
-                            value: value.toString(),
-                          ),
-                        );
-                      }
-                    }
-
-                    if (!context.mounted) {
-                      return;
-                    }
-
-                    Navigator.pop(context);
-                  },
-                  child: const Text('저장'),
-                ),
-              ],
-            );
-          },
-        );
-      },
-    );
-
-    // 다이얼로그가 완전히 닫힌 다음 처리
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      budgetController.dispose();
-
-      if (mounted) {
-        loadBudget();
-      }
-    });
-  }
-
   // 전체 데이터 초기화
   Future<void> resetAllData() async {
     final shouldReset = await showDialog<bool>(
@@ -367,7 +232,40 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       subtitle: budget == null
                           ? '아직 예산이 설정되지 않았어요.'
                           : '${formatAmount(budget!)}원',
-                      onTap: showBudgetDialog,
+                      onTap: () async {
+                        final result = await showDialog<int>(
+                          context: context,
+                          builder: (context) =>
+                              BudgetDialog(currentBudget: budget),
+                        );
+
+                        if (result == null) {
+                          return;
+                        }
+
+                        final setting = await DatabaseHelper.instance
+                            .getSetting('budget');
+
+                        if (setting == null) {
+                          await DatabaseHelper.instance.insertSetting(
+                            Settings(key: 'budget', value: result.toString()),
+                          );
+                        } else {
+                          await DatabaseHelper.instance.updateSetting(
+                            Settings(
+                              id: setting.id,
+                              key: 'budget',
+                              value: result.toString(),
+                            ),
+                          );
+                        }
+
+                        if (!mounted) {
+                          return;
+                        }
+
+                        await loadBudget();
+                      },
                     ),
                     buildSettingTile(
                       icon: Icons.category_rounded,
