@@ -653,10 +653,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                       height: 1,
                                       indent: 20,
                                       endIndent: 20,
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .outlineVariant
-                                          .withValues(alpha: 0.5),
+                                      color: borderColor,
                                     ),
                                 ],
                               );
@@ -668,10 +665,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 height: 1,
                                 indent: 20,
                                 endIndent: 20,
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .outlineVariant
-                                    .withValues(alpha: 0.5),
+                                color: borderColor,
                               ),
 
                               Align(

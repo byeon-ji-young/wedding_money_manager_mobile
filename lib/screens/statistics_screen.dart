@@ -78,6 +78,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final borderColor = colorScheme.outlineVariant.withValues(alpha: 0.5);
 
     // 예산 대비 전체 지출 비율
     final expenseRate = budget == null || budget == 0
@@ -132,11 +133,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                     decoration: BoxDecoration(
                       color: colorScheme.surface,
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: colorScheme.outlineVariant.withValues(
-                          alpha: 0.5,
-                        ),
-                      ),
+                      border: Border.all(color: borderColor),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -244,11 +241,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                     decoration: BoxDecoration(
                       color: colorScheme.surface,
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: colorScheme.outlineVariant.withValues(
-                          alpha: 0.5,
-                        ),
-                      ),
+                      // border: Border.all(color: borderColor),
                     ),
                     child: Column(
                       children: [
@@ -269,8 +262,8 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                             children: [
                               Padding(
                                 padding: const EdgeInsets.symmetric(
-                                  horizontal: 16,
-                                  vertical: 12,
+                                  horizontal: 18,
+                                  vertical: 8,
                                 ),
                                 child: Column(
                                   children: [
@@ -314,7 +307,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                                       ],
                                     ),
 
-                                    const SizedBox(height: 12),
+                                    const SizedBox(height: 4),
 
                                     Row(
                                       children: [
@@ -355,9 +348,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                                   height: 1,
                                   indent: 18,
                                   endIndent: 18,
-                                  color: colorScheme.outlineVariant.withValues(
-                                    alpha: 0.5,
-                                  ),
+                                  color: borderColor,
                                 ),
                             ],
                           );
@@ -381,11 +372,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                     decoration: BoxDecoration(
                       color: colorScheme.surface,
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: colorScheme.outlineVariant.withValues(
-                          alpha: 0.5,
-                        ),
-                      ),
+                      // border: Border.all(color: borderColor),
                     ),
                     child: Column(
                       children: [
@@ -404,8 +391,8 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                             children: [
                               Padding(
                                 padding: const EdgeInsets.symmetric(
-                                  horizontal: 16,
-                                  vertical: 12,
+                                  horizontal: 18,
+                                  vertical: 8,
                                 ),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -441,7 +428,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                                       ],
                                     ),
 
-                                    const SizedBox(height: 12),
+                                    const SizedBox(height: 10),
 
                                     Row(
                                       children: [
@@ -482,9 +469,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                                   height: 1,
                                   indent: 18,
                                   endIndent: 18,
-                                  color: colorScheme.outlineVariant.withValues(
-                                    alpha: 0.5,
-                                  ),
+                                  color: borderColor,
                                 ),
                             ],
                           );
