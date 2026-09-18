@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:wedding_money_manager_mobile/models/expense.dart';
 
 import '../utils/date_time_utils.dart';
+import '../utils/category_utils.dart';
+
 import '../database/database_helper.dart';
+
 import '../models/category.dart';
 
 class ExpenseRegisterScreen extends StatefulWidget {
@@ -188,77 +191,105 @@ class _ExpenseRegisterScreenState extends State<ExpenseRegisterScreen> {
   @override
   Widget build(BuildContext context) {
     final primaryColor = Theme.of(context).primaryColor;
+    final borderColor = Theme.of(
+      context,
+    ).colorScheme.outlineVariant.withValues(alpha: 0.5);
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(isEditMode ? '지출 수정' : '지출 추가'),
+        // title: Text(isEditMode ? '지출 수정' : '지출 추가'),
         centerTitle: true,
-        actions: [
-          if (isEditMode)
-            IconButton(
-              onPressed: deleteExpense,
-              icon: const Icon(
-                Icons.delete_outline_rounded,
-                color: Colors.redAccent,
-                size: 22,
-              ),
-            ),
-        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    isEditMode ? '지출 내역 수정' : '새로운 지출 기록',
+                    style: const TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+
+                if (isEditMode)
+                  IconButton(
+                    onPressed: deleteExpense,
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                    icon: const Icon(
+                      Icons.delete_outline,
+                      color: Colors.redAccent,
+                      size: 22,
+                    ),
+                    tooltip: '기록 삭제',
+                  ),
+              ],
+            ),
+
+            if (!isEditMode)
+              Text(
+                '지출 내역을 등록해 주세요.',
+                style: TextStyle(
+                  fontSize: 15,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+              ),
+
+            const SizedBox(height: 24),
+
             // 금액
             const Text(
-              '금액',
+              '* 금액',
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
 
             const SizedBox(height: 8),
 
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              decoration: BoxDecoration(
-                color: primaryColor.withValues(alpha: 0.06),
-                borderRadius: BorderRadius.circular(16),
+            TextField(
+              controller: amountController,
+              keyboardType: TextInputType.number,
+              style: TextStyle(
+                fontSize: 25,
+                fontWeight: FontWeight.bold,
+                color: primaryColor,
               ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: amountController,
-                      keyboardType: TextInputType.number,
-                      style: TextStyle(
-                        fontSize: 28,
-                        fontWeight: FontWeight.bold,
-                        color: primaryColor,
-                      ),
-                      decoration: const InputDecoration(
-                        hintText: '금액을 입력해주세요',
-                        hintStyle: TextStyle(fontSize: 18, color: Colors.grey),
-                        border: InputBorder.none,
-                      ),
-                    ),
-                  ),
-                  Text(
-                    '원',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: primaryColor,
-                    ),
-                  ),
-                ],
+              decoration: InputDecoration(
+                filled: true,
+                fillColor: Colors.white,
+                hintText: '금액을 입력하세요',
+                hintStyle: const TextStyle(fontSize: 18, color: Colors.grey),
+                suffixText: '원',
+                suffixStyle: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: primaryColor,
+                ),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 14,
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: borderColor),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: primaryColor, width: 1.5),
+                ),
               ),
             ),
 
-            const SizedBox(height: 24),
+            const SizedBox(height: 20),
 
             // 날짜
             const Text(
-              '날짜',
+              '* 날짜',
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
 
@@ -290,7 +321,7 @@ class _ExpenseRegisterScreenState extends State<ExpenseRegisterScreen> {
                 ),
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  border: Border.all(color: Colors.grey.shade300),
+                  border: Border.all(color: borderColor),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Row(
@@ -310,11 +341,11 @@ class _ExpenseRegisterScreenState extends State<ExpenseRegisterScreen> {
               ),
             ),
 
-            const SizedBox(height: 24),
+            const SizedBox(height: 20),
 
             // 카테고리
             const Text(
-              '카테고리',
+              '* 카테고리',
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
 
@@ -323,13 +354,15 @@ class _ExpenseRegisterScreenState extends State<ExpenseRegisterScreen> {
             DropdownButtonFormField<int>(
               initialValue: selectedCategoryId,
               decoration: InputDecoration(
+                filled: true,
+                fillColor: Colors.white,
                 contentPadding: const EdgeInsets.symmetric(
                   horizontal: 16,
                   vertical: 14,
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: Colors.grey.shade300),
+                  borderSide: BorderSide(color: borderColor),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -337,9 +370,29 @@ class _ExpenseRegisterScreenState extends State<ExpenseRegisterScreen> {
                 ),
               ),
               items: categories.map((category) {
+                final categoryColor = getCategoryColor(category.name);
+
                 return DropdownMenuItem<int>(
                   value: category.id,
-                  child: Text(category.name),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 32,
+                        height: 32,
+                        decoration: BoxDecoration(
+                          color: categoryColor.withValues(alpha: 0.12),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          getCategoryIcon(category.name),
+                          color: categoryColor,
+                          size: 17,
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Text(category.name),
+                    ],
+                  ),
                 );
               }).toList(),
               onChanged: (value) {
@@ -349,11 +402,11 @@ class _ExpenseRegisterScreenState extends State<ExpenseRegisterScreen> {
               },
             ),
 
-            const SizedBox(height: 24),
+            const SizedBox(height: 20),
 
             // 결제자
             const Text(
-              '결제자',
+              '* 결제자',
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
 
@@ -368,21 +421,15 @@ class _ExpenseRegisterScreenState extends State<ExpenseRegisterScreen> {
                       child: Text(
                         '나',
                         textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: selectedPayer == '나'
-                              ? primaryColor
-                              : Colors.black87,
-                        ),
+                        style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
                     ),
                     selected: selectedPayer == '나',
-                    selectedColor: primaryColor.withValues(alpha: 0.15),
+                    selectedColor: primaryColor.withValues(alpha: 0.1),
                     backgroundColor: Colors.white,
                     side: BorderSide(
-                      color: selectedPayer == '나'
-                          ? primaryColor
-                          : Colors.grey.shade300,
+                      color: selectedPayer == '나' ? primaryColor : borderColor,
+                      width: 1.5,
                     ),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -405,21 +452,17 @@ class _ExpenseRegisterScreenState extends State<ExpenseRegisterScreen> {
                       child: Text(
                         '배우자',
                         textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: selectedPayer == '배우자'
-                              ? primaryColor
-                              : Colors.black87,
-                        ),
+                        style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
                     ),
                     selected: selectedPayer == '배우자',
-                    selectedColor: primaryColor.withValues(alpha: 0.15),
+                    selectedColor: primaryColor.withValues(alpha: 0.1),
                     backgroundColor: Colors.white,
                     side: BorderSide(
                       color: selectedPayer == '배우자'
                           ? primaryColor
-                          : Colors.grey.shade300,
+                          : borderColor,
+                      width: 1.5,
                     ),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -435,7 +478,7 @@ class _ExpenseRegisterScreenState extends State<ExpenseRegisterScreen> {
               ],
             ),
 
-            const SizedBox(height: 24),
+            const SizedBox(height: 20),
 
             // 메모
             const Text(
@@ -447,8 +490,11 @@ class _ExpenseRegisterScreenState extends State<ExpenseRegisterScreen> {
 
             TextField(
               controller: memoController,
+              maxLines: 3,
               decoration: InputDecoration(
-                hintText: '메모를 입력해주세요',
+                filled: true,
+                fillColor: Colors.white,
+                hintText: '메모를 입력하세요',
                 hintStyle: const TextStyle(color: Colors.grey),
                 contentPadding: const EdgeInsets.symmetric(
                   horizontal: 16,
@@ -456,7 +502,7 @@ class _ExpenseRegisterScreenState extends State<ExpenseRegisterScreen> {
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: Colors.grey.shade300),
+                  borderSide: BorderSide(color: borderColor),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -474,18 +520,26 @@ class _ExpenseRegisterScreenState extends State<ExpenseRegisterScreen> {
           padding: const EdgeInsets.all(20),
           child: SizedBox(
             width: double.infinity,
-            height: 52,
+            height: 50,
             child: ElevatedButton(
               onPressed: saveExpense,
               style: ElevatedButton.styleFrom(
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
+                  // side: BorderSide(color: primaryColor, width: 1),
                 ),
-                elevation: 1,
+                elevation: 0,
               ),
-              child: const Text(
-                '저장',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.wallet, size: 20),
+                  const SizedBox(width: 8),
+                  Text(
+                    isEditMode ? '수정하기' : '추가하기',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                ],
               ),
             ),
           ),
