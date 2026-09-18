@@ -523,4 +523,85 @@ class DatabaseHelper {
 
     return path;
   }
+
+  // 백업 JSON 파일을 선택해서 읽기
+  Future<String?> pickBackupFile() async {
+    final file = await FilePicker.pickFile(
+      type: FileType.custom,
+      allowedExtensions: ['json'],
+    );
+
+    if (file == null) {
+      return null;
+    }
+
+    final bytes = await file.readAsBytes();
+
+    return utf8.decode(bytes);
+  }
+
+  // 백업 JSON 파일이 올바른 형식인지 확인
+  bool isValidBackupData(String jsonString) {
+    try {
+      final data = jsonDecode(jsonString);
+
+      // JSON으로 변환 가능한가?
+      if (data is! Map<String, dynamic>) {
+        return false;
+      }
+      // version = 1인가?
+      else if (data['version'] != 1) {
+        return false;
+      }
+      // categories가 있는가?
+      else if (data['categories'] is! List) {
+        return false;
+      }
+      // expenses가 있는가?
+      else if (data['expenses'] is! List) {
+        return false;
+      }
+      // settings가 있는가?
+      else if (data['settings'] is! List) {
+        return false;
+      }
+
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  // 백업 데이터를 데이터베이스에 복원
+  Future<void> restoreBackupData(String jsonString) async {
+    final data = jsonDecode(jsonString) as Map<String, dynamic>;
+
+    final categories = data['categories'] as List;
+    final expenses = data['expenses'] as List;
+    final settings = data['settings'] as List;
+
+    final db = await database;
+
+    await db.transaction((txn) async {
+      // 기존 데이터를 삭제
+      await txn.delete('expenses');
+      await txn.delete('settings');
+      await txn.delete('categories');
+
+      // 카테고리 복원
+      for (final category in categories) {
+        await txn.insert('categories', Map<String, dynamic>.from(category));
+      }
+
+      // 지출 복원
+      for (final expense in expenses) {
+        await txn.insert('expenses', Map<String, dynamic>.from(expense));
+      }
+
+      // 설정 복원
+      for (final setting in settings) {
+        await txn.insert('settings', Map<String, dynamic>.from(setting));
+      }
+    });
+  }
 }

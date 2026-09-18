@@ -173,6 +173,83 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
   }
 
+  // 데이터 복원
+  Future<void> restoreData() async {
+    final jsonString = await DatabaseHelper.instance.pickBackupFile();
+
+    if (jsonString == null) {
+      return;
+    }
+
+    // 백업 파일 형식을 확인
+    final isValid = DatabaseHelper.instance.isValidBackupData(jsonString);
+
+    if (!isValid) {
+      if (!mounted) {
+        return;
+      }
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('올바른 백업 파일이 아니에요.')));
+
+      return;
+    }
+
+    if (!mounted) {
+      return;
+    }
+
+    // 기존 데이터가 모두 삭제된다는 것을 안내
+    final shouldRestore = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          // title: const Text('데이터 복원'),
+          content: const Text(
+            '현재 저장된 데이터가 백업 파일의 데이터로 변경됩니다.\n\n'
+            '계속하시겠어요?',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context, false);
+              },
+              child: const Text('취소'),
+            ),
+            FilledButton(
+              onPressed: () {
+                Navigator.pop(context, true);
+              },
+              child: const Text('복원'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (shouldRestore != true) {
+      return;
+    }
+
+    await DatabaseHelper.instance.restoreBackupData(jsonString);
+
+    if (!mounted) {
+      return;
+    }
+
+    await loadBudget();
+
+    // await 뒤에 context를 사용한다 → mounted 확인 ★
+    if (!mounted) {
+      return;
+    }
+
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('데이터를 복원했어요.')));
+  }
+
   // 전체 데이터 초기화
   Future<void> resetAllData() async {
     final shouldReset = await showDialog<bool>(
@@ -294,6 +371,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       title: '데이터 백업',
                       subtitle: '결혼자금 데이터를 파일로 저장해요.',
                       onTap: backupData,
+                    ),
+                    buildSettingTile(
+                      icon: Icons.restore_rounded,
+                      title: '데이터 복원',
+                      subtitle: '백업한 파일로 데이터를 복원해요.',
+                      onTap: restoreData,
                     ),
                     buildSettingTile(
                       icon: Icons.delete_forever_rounded,
