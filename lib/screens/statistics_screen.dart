@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../database/database_helper.dart';
 
+import '../utils/category_utils.dart';
+
 class StatisticsScreen extends StatefulWidget {
   const StatisticsScreen({super.key});
 
@@ -12,10 +14,13 @@ class StatisticsScreen extends StatefulWidget {
 class _StatisticsScreenState extends State<StatisticsScreen> {
   // 카테고리 지출 합계
   List<Map<String, dynamic>> categorySummary = [];
+
   // 월별 지출 합계
   List<Map<String, dynamic>> monthlySummary = [];
+
   // 전체 지출 금액
   int totalExpense = 0;
+
   // 전체 예산
   int? budget;
 
@@ -62,6 +67,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
     }
   }
 
+  // 금액을 천 단위 콤마가 포함된 문자열로 변환
   String formatAmount(int amount) {
     return amount.toString().replaceAllMapped(
       RegExp(r'\B(?=(\d{3})+(?!\d))'),
@@ -71,268 +77,425 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    // 예산 대비 전체 지출 비율
     final expenseRate = budget == null || budget == 0
         ? null
         : totalExpense / budget!;
 
+    // 남은 예산
     final remainBudget = budget == null ? null : budget! - totalExpense;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('지출 통계')),
+      appBar: AppBar(
+        scrolledUnderElevation: 0,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        surfaceTintColor: Colors.transparent,
+      ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : categorySummary.isEmpty
-          ? const Center(child: Text('아직 지출 내역이 없습니다.'))
-          : ListView(
-              padding: const EdgeInsets.all(20),
-              children: [
-                // 전체 지출 요약 카드
-                Container(
-                  padding: const EdgeInsets.all(24),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.primaryContainer,
-                    borderRadius: BorderRadius.circular(24),
+          ? const Center(
+              child: Text(
+                '아직 지출 내역이 없습니다.',
+                style: TextStyle(color: Colors.grey),
+              ),
+            )
+          : SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // 화면 제목
+                  const Text(
+                    '지출 통계',
+                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                   ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // 제목
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.favorite_rounded,
-                            color: Theme.of(context).colorScheme.primary,
-                          ),
-                          const SizedBox(width: 8),
-                          const Text(
-                            '총 지출',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
 
-                      const SizedBox(height: 12),
+                  const SizedBox(height: 2),
 
-                      // 총 지출 금액
-                      Text(
-                        '${formatAmount(totalExpense)}원',
-                        style: const TextStyle(
-                          fontSize: 30,
-                          fontWeight: FontWeight.bold,
+                  Text(
+                    '우리의 결혼자금 지출 현황을 한눈에 확인할 수 있어요.',
+                    style: TextStyle(
+                      fontSize: 15,
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+
+                  const SizedBox(height: 24),
+
+                  // 전체 지출 요약
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(24),
+                    decoration: BoxDecoration(
+                      color: colorScheme.surface,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: colorScheme.outlineVariant.withValues(
+                          alpha: 0.5,
                         ),
                       ),
-
-                      // 예산이 설정되어 있는 경우
-                      if (budget != null) ...[
-                        const SizedBox(height: 24),
-
-                        // 예산 금액 + 지출 비율
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
                         Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text(
-                              '예산 ${formatAmount(budget!)}원',
-                              style: const TextStyle(fontSize: 14),
+                            Icon(
+                              Icons.favorite_rounded,
+                              size: 20,
+                              color: colorScheme.primary,
                             ),
-                            Text(
-                              '${(expenseRate! * 100).toStringAsFixed(1)}%',
+                            const SizedBox(width: 8),
+                            const Text(
+                              '총 지출',
                               style: TextStyle(
-                                fontSize: 14,
+                                fontSize: 18,
                                 fontWeight: FontWeight.bold,
-                                color: Theme.of(context).colorScheme.primary,
                               ),
                             ),
                           ],
                         ),
 
-                        const SizedBox(height: 8),
+                        const SizedBox(height: 20),
 
-                        // 예산 대비 지출 비율
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(8),
-                          child: LinearProgressIndicator(
-                            value: expenseRate.clamp(0.0, 1.0),
-                            minHeight: 10,
-                          ),
-                        ),
-
-                        const SizedBox(height: 10),
-
-                        // 남은 예산 / 초과 금액
                         Text(
-                          remainBudget! >= 0
-                              ? '남은 예산 ${formatAmount(remainBudget)}원'
-                              : '예산을 ${formatAmount(remainBudget.abs())}원 초과했어요.',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: remainBudget >= 0
-                                ? Colors.grey.shade700
-                                : Colors.red,
+                          '${formatAmount(totalExpense)}원',
+                          style: const TextStyle(
+                            fontSize: 28,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
-                      ],
 
-                      // 예산이 설정되지 않은 경우
-                      if (budget == null) ...[
-                        const SizedBox(height: 12),
-                        const Text(
-                          '아직 예산이 설정되지 않았어요.',
-                          style: TextStyle(fontSize: 14, color: Colors.grey),
-                        ),
+                        if (budget != null) ...[
+                          const SizedBox(height: 20),
+
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                '예산 ${formatAmount(budget!)}원',
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                              Text(
+                                '${(expenseRate! * 100).toStringAsFixed(1)}%',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                  color: colorScheme.primary,
+                                ),
+                              ),
+                            ],
+                          ),
+
+                          const SizedBox(height: 8),
+
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(10),
+                            child: LinearProgressIndicator(
+                              value: expenseRate.clamp(0.0, 1.0),
+                              minHeight: 8,
+                            ),
+                          ),
+
+                          const SizedBox(height: 12),
+
+                          Text(
+                            remainBudget! >= 0
+                                ? '남은 예산 ${formatAmount(remainBudget)}원'
+                                : '예산을 ${formatAmount(remainBudget.abs())}원 초과했어요.',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: remainBudget >= 0
+                                  ? colorScheme.onSurfaceVariant
+                                  : colorScheme.error,
+                            ),
+                          ),
+                        ],
+
+                        if (budget == null) ...[
+                          const SizedBox(height: 12),
+                          const Text(
+                            '아직 예산이 설정되지 않았어요.',
+                            style: TextStyle(fontSize: 14, color: Colors.grey),
+                          ),
+                        ],
                       ],
-                    ],
+                    ),
                   ),
-                ),
 
-                const SizedBox(height: 28),
+                  const SizedBox(height: 24),
 
-                // 카테고리별 지출
-                const Text(
-                  '카테고리별 지출',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                ),
+                  // 카테고리별 지출
+                  const Text(
+                    '카테고리별 지출',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
 
-                const SizedBox(height: 12),
+                  const SizedBox(height: 8),
 
-                ...categorySummary.map((item) {
-                  final categoryName = item['categoryName'] as String;
-                  final totalAmount = item['totalAmount'] as int;
-                  final percentage = totalExpense == 0
-                      ? 0
-                      : totalAmount / totalExpense * 100;
-
-                  return Card(
-                    margin: const EdgeInsets.only(bottom: 12),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // 카테고리 이름
-                          Text(
-                            categoryName,
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                            ),
-                          ),
-
-                          const SizedBox(height: 8),
-
-                          // 금액 + 비율
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                '${formatAmount(totalAmount)}원',
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              Text(
-                                '${percentage.toStringAsFixed(1)}%',
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  color: Theme.of(context).colorScheme.primary,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
-
-                          const SizedBox(height: 8),
-
-                          // 카테고리별 지출 비율 막대
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(8),
-                            child: LinearProgressIndicator(
-                              value: totalExpense == 0
-                                  ? 0
-                                  : totalAmount / totalExpense,
-                              minHeight: 10,
-                            ),
-                          ),
-                        ],
+                  Container(
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      color: colorScheme.surface,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: colorScheme.outlineVariant.withValues(
+                          alpha: 0.5,
+                        ),
                       ),
                     ),
-                  );
-                }),
+                    child: Column(
+                      children: [
+                        ...categorySummary.asMap().entries.map((entry) {
+                          final index = entry.key;
+                          final item = entry.value;
 
-                const SizedBox(height: 16),
+                          final categoryName = item['categoryName'] as String;
+                          final totalAmount = item['totalAmount'] as int;
 
-                const Text(
-                  '월별 지출',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                ),
+                          final percentage = totalExpense == 0
+                              ? 0.0
+                              : totalAmount / totalExpense;
 
-                const SizedBox(height: 12),
+                          final categoryColor = getCategoryColor(categoryName);
 
-                ...monthlySummary.map((item) {
-                  final month = item['month'] as String;
-                  final totalAmount = item['totalAmount'] as int;
-
-                  final percentage = totalExpense == 0
-                      ? 0.0
-                      : totalAmount / totalExpense;
-
-                  return Card(
-                    margin: const EdgeInsets.only(bottom: 12),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // 월
-                          Text(
-                            '${month.substring(0, 4)}년 ${int.parse(month.substring(5, 7))}월',
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                            ),
-                          ),
-
-                          const SizedBox(height: 8),
-
-                          // 금액 + 전체 지출 대비 비율
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          return Column(
                             children: [
-                              Text(
-                                '${formatAmount(totalAmount)}원',
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 12,
+                                ),
+                                child: Column(
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Container(
+                                          width: 42,
+                                          height: 42,
+                                          decoration: BoxDecoration(
+                                            color: categoryColor.withValues(
+                                              alpha: 0.12,
+                                            ),
+                                            shape: BoxShape.circle,
+                                          ),
+                                          child: Icon(
+                                            getCategoryIcon(categoryName),
+                                            color: categoryColor,
+                                            size: 21,
+                                          ),
+                                        ),
+
+                                        const SizedBox(width: 12),
+
+                                        Expanded(
+                                          child: Text(
+                                            categoryName,
+                                            style: const TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                        ),
+
+                                        Text(
+                                          '${formatAmount(totalAmount)}원',
+                                          style: const TextStyle(
+                                            fontSize: 15,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+
+                                    const SizedBox(height: 12),
+
+                                    Row(
+                                      children: [
+                                        Expanded(
+                                          child: ClipRRect(
+                                            borderRadius: BorderRadius.circular(
+                                              10,
+                                            ),
+                                            child: LinearProgressIndicator(
+                                              value: percentage,
+                                              minHeight: 7,
+                                            ),
+                                          ),
+                                        ),
+
+                                        const SizedBox(width: 10),
+
+                                        SizedBox(
+                                          width: 48,
+                                          child: Text(
+                                            '${(percentage * 100).toStringAsFixed(1)}%',
+                                            textAlign: TextAlign.right,
+                                            style: TextStyle(
+                                              fontSize: 13,
+                                              fontWeight: FontWeight.bold,
+                                              color: colorScheme.primary,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
                                 ),
                               ),
-                              Text(
-                                '${(percentage * 100).toStringAsFixed(1)}%',
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  color: Theme.of(context).colorScheme.primary,
-                                  fontWeight: FontWeight.bold,
+
+                              if (index != categorySummary.length - 1)
+                                Divider(
+                                  height: 1,
+                                  indent: 18,
+                                  endIndent: 18,
+                                  color: colorScheme.outlineVariant.withValues(
+                                    alpha: 0.5,
+                                  ),
                                 ),
-                              ),
                             ],
-                          ),
+                          );
+                        }),
+                      ],
+                    ),
+                  ),
 
-                          const SizedBox(height: 8),
+                  const SizedBox(height: 24),
 
-                          // 월별 지출 비율 막대
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(8),
-                            child: LinearProgressIndicator(
-                              value: percentage,
-                              minHeight: 10,
-                            ),
-                          ),
-                        ],
+                  // 월별 지출
+                  const Text(
+                    '월별 지출',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+
+                  const SizedBox(height: 8),
+
+                  Container(
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      color: colorScheme.surface,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: colorScheme.outlineVariant.withValues(
+                          alpha: 0.5,
+                        ),
                       ),
                     ),
-                  );
-                }),
-              ],
+                    child: Column(
+                      children: [
+                        ...monthlySummary.asMap().entries.map((entry) {
+                          final index = entry.key;
+                          final item = entry.value;
+
+                          final month = item['month'] as String;
+                          final totalAmount = item['totalAmount'] as int;
+
+                          final percentage = totalExpense == 0
+                              ? 0.0
+                              : totalAmount / totalExpense;
+
+                          return Column(
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 12,
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Icon(
+                                          Icons.calendar_month_rounded,
+                                          size: 22,
+                                          color: colorScheme.primary,
+                                        ),
+
+                                        const SizedBox(width: 10),
+
+                                        Expanded(
+                                          child: Text(
+                                            '${month.substring(0, 4)}년 '
+                                            '${int.parse(month.substring(5, 7))}월',
+                                            style: const TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                        ),
+
+                                        Text(
+                                          '${formatAmount(totalAmount)}원',
+                                          style: const TextStyle(
+                                            fontSize: 15,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+
+                                    const SizedBox(height: 12),
+
+                                    Row(
+                                      children: [
+                                        Expanded(
+                                          child: ClipRRect(
+                                            borderRadius: BorderRadius.circular(
+                                              10,
+                                            ),
+                                            child: LinearProgressIndicator(
+                                              value: percentage,
+                                              minHeight: 7,
+                                            ),
+                                          ),
+                                        ),
+
+                                        const SizedBox(width: 10),
+
+                                        SizedBox(
+                                          width: 48,
+                                          child: Text(
+                                            '${(percentage * 100).toStringAsFixed(1)}%',
+                                            textAlign: TextAlign.right,
+                                            style: TextStyle(
+                                              fontSize: 13,
+                                              fontWeight: FontWeight.bold,
+                                              color: colorScheme.primary,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+
+                              if (index != monthlySummary.length - 1)
+                                Divider(
+                                  height: 1,
+                                  indent: 18,
+                                  endIndent: 18,
+                                  color: colorScheme.outlineVariant.withValues(
+                                    alpha: 0.5,
+                                  ),
+                                ),
+                            ],
+                          );
+                        }),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 30),
+                ],
+              ),
             ),
     );
   }
