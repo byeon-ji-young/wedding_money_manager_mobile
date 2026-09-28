@@ -263,18 +263,20 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen> {
                                                 crossAxisAlignment:
                                                     CrossAxisAlignment.start,
                                                 children: [
-                                                  Text(
-                                                    expense.memo?.isNotEmpty ==
-                                                            true
-                                                        ? expense.memo!
-                                                        : '지출 내역',
-                                                    style: const TextStyle(
-                                                      fontSize: 15,
-                                                      fontWeight:
-                                                          FontWeight.w600,
+                                                  if (expense
+                                                          .memo
+                                                          ?.isNotEmpty ==
+                                                      true) ...[
+                                                    Text(
+                                                      expense.memo!,
+                                                      style: const TextStyle(
+                                                        fontSize: 15,
+                                                        fontWeight:
+                                                            FontWeight.w600,
+                                                      ),
                                                     ),
-                                                  ),
-                                                  const SizedBox(height: 4),
+                                                    const SizedBox(height: 4),
+                                                  ],
                                                   Text(
                                                     '${formatDate(expense.date)} · ${expense.paymentMethod}',
                                                     style: TextStyle(
