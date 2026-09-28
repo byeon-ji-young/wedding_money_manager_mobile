@@ -564,25 +564,78 @@ class DatabaseHelper {
     try {
       final data = jsonDecode(jsonString);
 
-      // JSON으로 변환 가능한가?
+      // 전체 데이터가 Map 형태인가?
       if (data is! Map<String, dynamic>) {
         return false;
       }
-      // version = 1인가?
-      else if (data['version'] != 1) {
+
+      // 백업 버전 확인
+      if (data['version'] != 1) {
         return false;
       }
-      // categories가 있는가?
-      else if (data['categories'] is! List) {
+
+      // categories가 List인가?
+      if (data['categories'] is! List) {
         return false;
       }
-      // expenses가 있는가?
-      else if (data['expenses'] is! List) {
+
+      // expenses가 List인가?
+      if (data['expenses'] is! List) {
         return false;
       }
-      // settings가 있는가?
-      else if (data['settings'] is! List) {
+
+      // settings가 List인가?
+      if (data['settings'] is! List) {
         return false;
+      }
+
+      // 카테고리 데이터 확인
+      for (final category in data['categories']) {
+        if (category is! Map) {
+          return false;
+        }
+
+        if (category['id'] is! int ||
+            category['name'] is! String ||
+            category['createdAt'] is! String) {
+          return false;
+        }
+      }
+
+      // 지출 데이터 확인
+      for (final expense in data['expenses']) {
+        if (expense is! Map) {
+          return false;
+        }
+
+        if (expense['id'] is! int ||
+            expense['amount'] is! int ||
+            expense['date'] is! String ||
+            expense['categoryId'] is! int ||
+            expense['payer'] is! String ||
+            expense['memo'] != null && expense['memo'] is! String ||
+            expense['createdAt'] is! String) {
+          return false;
+        }
+
+        // paymentMethod는 예전 백업에는 없을 수 있으므로 선택적으로 확인
+        if (expense['paymentMethod'] != null &&
+            expense['paymentMethod'] is! String) {
+          return false;
+        }
+      }
+
+      // 설정 데이터 확인
+      for (final setting in data['settings']) {
+        if (setting is! Map) {
+          return false;
+        }
+
+        if (setting['id'] is! int ||
+            setting['key'] is! String ||
+            setting['value'] is! String) {
+          return false;
+        }
       }
 
       return true;
