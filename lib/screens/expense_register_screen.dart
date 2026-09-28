@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:wedding_money_manager_mobile/models/expense.dart';
+import 'package:flutter/services.dart';
 
 import '../utils/date_time_utils.dart';
 import '../utils/category_utils.dart';
@@ -36,13 +37,36 @@ class _ExpenseRegisterScreenState extends State<ExpenseRegisterScreen> {
   // 등록, 수정 판단
   bool get isEditMode => widget.expense != null;
 
+  // 금액 입력 시 천 단위 쉼표 표시
+  final amountFormatter = TextInputFormatter.withFunction((oldValue, newValue) {
+    final number = newValue.text.replaceAll(',', '');
+
+    if (number.isEmpty) {
+      return newValue.copyWith(text: '');
+    }
+
+    if (!RegExp(r'^\d+$').hasMatch(number)) {
+      return oldValue;
+    }
+
+    final formatted = number.replaceAllMapped(
+      RegExp(r'\B(?=(\d{3})+(?!\d))'),
+      (match) => ',',
+    );
+
+    return TextEditingValue(
+      text: formatted,
+      selection: TextSelection.collapsed(offset: formatted.length),
+    );
+  });
+
   @override
   void initState() {
     super.initState();
 
     // 수정 모드라면 기존 지출 정보를 입력값에 넣기
     if (isEditMode) {
-      amountController.text = widget.expense!.amount.toString();
+      amountController.text = formatAmount(widget.expense!.amount);
       memoController.text = widget.expense!.memo ?? '';
 
       selectedDate = widget.expense!.date;
@@ -192,6 +216,14 @@ class _ExpenseRegisterScreenState extends State<ExpenseRegisterScreen> {
     Navigator.pop(context);
   }
 
+  // 금액에 천 단위 쉼표를 추가
+  String formatAmount(int amount) {
+    return amount.toString().replaceAllMapped(
+      RegExp(r'\B(?=(\d{3})+(?!\d))'),
+      (match) => ',',
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final primaryColor = Theme.of(context).primaryColor;
@@ -257,6 +289,7 @@ class _ExpenseRegisterScreenState extends State<ExpenseRegisterScreen> {
             TextField(
               controller: amountController,
               keyboardType: TextInputType.number,
+              inputFormatters: [amountFormatter],
               style: TextStyle(
                 fontSize: 25,
                 fontWeight: FontWeight.bold,
