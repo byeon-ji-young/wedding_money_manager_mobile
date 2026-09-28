@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class BudgetDialog extends StatefulWidget {
   final int? currentBudget;
@@ -12,12 +13,40 @@ class BudgetDialog extends StatefulWidget {
 class _BudgetDialogState extends State<BudgetDialog> {
   late final TextEditingController controller;
 
+  // 금액 입력 시 천 단위 쉼표 표시
+  final amountFormatter = TextInputFormatter.withFunction((oldValue, newValue) {
+    final number = newValue.text.replaceAll(',', '');
+
+    if (number.isEmpty) {
+      return newValue.copyWith(text: '');
+    }
+
+    if (!RegExp(r'^\d+$').hasMatch(number)) {
+      return oldValue;
+    }
+
+    final formatted = number.replaceAllMapped(
+      RegExp(r'\B(?=(\d{3})+(?!\d))'),
+      (match) => ',',
+    );
+
+    return TextEditingValue(
+      text: formatted,
+      selection: TextSelection.collapsed(offset: formatted.length),
+    );
+  });
+
   @override
   void initState() {
     super.initState();
 
     controller = TextEditingController(
-      text: widget.currentBudget?.toString() ?? '',
+      text: widget.currentBudget == null
+          ? ''
+          : widget.currentBudget!.toString().replaceAllMapped(
+              RegExp(r'\B(?=(\d{3})+(?!\d))'),
+              (match) => ',',
+            ),
     );
   }
 
@@ -46,6 +75,7 @@ class _BudgetDialogState extends State<BudgetDialog> {
             controller: controller,
             autofocus: true,
             keyboardType: TextInputType.number,
+            inputFormatters: [amountFormatter],
             decoration: InputDecoration(
               hintText: '예: 50,000,000',
               suffixText: '원',
