@@ -414,6 +414,28 @@ class DatabaseHelper {
     return result;
   }
 
+  // 결제수단별 지출 금액 조회
+  Future<Map<String, int>> getExpenseByPaymentMethod() async {
+    final db = await database;
+
+    final result = await db.rawQuery('''
+      SELECT paymentMethod, SUM(amount) AS totalAmount
+      FROM expenses
+      GROUP BY paymentMethod
+    ''');
+
+    final Map<String, int> paymentMethodExpenses = {};
+
+    for (final row in result) {
+      final paymentMethod = row['paymentMethod'] as String;
+      final totalAmount = row['totalAmount'] as int;
+
+      paymentMethodExpenses[paymentMethod] = totalAmount;
+    }
+
+    return paymentMethodExpenses;
+  }
+
   // ========================================================= settings =========================================================
   // 설정 전체 조회
   Future<List<Settings>> getSettings() async {

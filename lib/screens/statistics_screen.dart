@@ -20,6 +20,9 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   // 월별 지출 합계
   List<Map<String, dynamic>> monthlySummary = [];
 
+  // 결제수단별 지출 합계
+  Map<String, int> paymentMethodSummary = {};
+
   // 전체 지출 금액
   int totalExpense = 0;
 
@@ -42,6 +45,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
         DatabaseHelper.instance.getTotalExpense(),
         DatabaseHelper.instance.getBudget(),
         DatabaseHelper.instance.getMonthlyExpenseSummary(),
+        DatabaseHelper.instance.getExpenseByPaymentMethod(),
       ]);
 
       if (!mounted) {
@@ -53,6 +57,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
         totalExpense = result[1] as int;
         budget = result[2] as int?;
         monthlySummary = result[3] as List<Map<String, dynamic>>;
+        paymentMethodSummary = result[4] as Map<String, int>;
 
         isLoading = false;
       });
@@ -372,6 +377,132 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                               ),
 
                               if (index != categorySummary.length - 1)
+                                Divider(
+                                  height: 1,
+                                  indent: 18,
+                                  endIndent: 18,
+                                  color: borderColor,
+                                ),
+                            ],
+                          );
+                        }),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 24),
+
+                  // 결제수단별 지출
+                  const Text(
+                    '결제수단별 지출',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+
+                  const SizedBox(height: 8),
+
+                  Container(
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      color: colorScheme.surface,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Column(
+                      children: [
+                        ...['신용카드', '체크카드', '계좌이체', '현금'].asMap().entries.map((
+                          entry,
+                        ) {
+                          final index = entry.key;
+                          final paymentMethod = entry.value;
+
+                          final totalAmount =
+                              paymentMethodSummary[paymentMethod] ?? 0;
+
+                          final percentage = totalExpense == 0
+                              ? 0.0
+                              : totalAmount / totalExpense;
+
+                          return Column(
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 18,
+                                  vertical: 12,
+                                ),
+                                child: Column(
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Icon(
+                                          paymentMethod == '신용카드'
+                                              ? Icons.credit_card_rounded
+                                              : paymentMethod == '체크카드'
+                                              ? Icons.credit_score_rounded
+                                              : paymentMethod == '계좌이체'
+                                              ? Icons.account_balance_rounded
+                                              : Icons.payments_rounded,
+                                          size: 22,
+                                          color: colorScheme.primary,
+                                        ),
+
+                                        const SizedBox(width: 10),
+
+                                        Expanded(
+                                          child: Text(
+                                            paymentMethod,
+                                            style: const TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                        ),
+
+                                        Text(
+                                          '${formatAmount(totalAmount)}원',
+                                          style: const TextStyle(
+                                            fontSize: 15,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+
+                                    const SizedBox(height: 10),
+
+                                    Row(
+                                      children: [
+                                        Expanded(
+                                          child: ClipRRect(
+                                            borderRadius: BorderRadius.circular(
+                                              10,
+                                            ),
+                                            child: LinearProgressIndicator(
+                                              value: percentage,
+                                              minHeight: 7,
+                                            ),
+                                          ),
+                                        ),
+
+                                        const SizedBox(width: 10),
+
+                                        SizedBox(
+                                          width: 48,
+                                          child: Text(
+                                            '${(percentage * 100).toStringAsFixed(1)}%',
+                                            textAlign: TextAlign.right,
+                                            style: TextStyle(
+                                              fontSize: 13,
+                                              fontWeight: FontWeight.bold,
+                                              color: colorScheme.primary,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+
+                              if (index != 3)
                                 Divider(
                                   height: 1,
                                   indent: 18,
