@@ -4,6 +4,7 @@ class ExpenseWithCategory {
   final DateTime date; // 지출 날짜
   final String categoryName; // 카테고리 이름
   final String payer; // 지출한 사람
+  final String paymentMethod; // 결제수단
   final String? memo; // 메모
 
   ExpenseWithCategory({
@@ -12,6 +13,7 @@ class ExpenseWithCategory {
     required this.date,
     required this.categoryName,
     required this.payer,
+    required this.paymentMethod,
     this.memo,
   });
 }

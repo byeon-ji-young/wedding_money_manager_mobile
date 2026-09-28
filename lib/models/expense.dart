@@ -4,6 +4,7 @@ class Expense {
   final DateTime date; // 지출 날짜
   final int categoryId; // 지출 카테고리 번호
   final String payer; // 지출한 사람
+  final String paymentMethod; // 결제수단
   final String? memo; // 메모
   final DateTime createdAt; // 데이터가 생성된 시간
 
@@ -13,6 +14,7 @@ class Expense {
     required this.date,
     required this.categoryId,
     required this.payer,
+    required this.paymentMethod,
     this.memo,
     required this.createdAt,
   });
@@ -25,6 +27,7 @@ class Expense {
       'date': date.toIso8601String(),
       'categoryId': categoryId,
       'payer': payer,
+      'paymentMethod': paymentMethod,
       'memo': memo,
       'createdAt': createdAt.toIso8601String(),
     };
@@ -38,6 +41,7 @@ class Expense {
       date: DateTime.parse(map['date'] as String),
       categoryId: map['categoryId'] as int,
       payer: map['payer'] as String,
+      paymentMethod: map['paymentMethod'] as String,
       memo: map['memo'] as String?,
       createdAt: DateTime.parse(map['createdAt'] as String),
     );

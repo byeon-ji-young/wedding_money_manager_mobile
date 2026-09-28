@@ -16,7 +16,7 @@ class DatabaseHelper {
   static const String _databaseName = 'wedding_money_manager.db';
 
   // 데이터베이스 버전
-  static const int _databaseVersion = 1;
+  static const int _databaseVersion = 2;
 
   // 싱글톤 인스턴스
   static final DatabaseHelper instance = DatabaseHelper._internal();
@@ -52,10 +52,11 @@ class DatabaseHelper {
       path,
       version: _databaseVersion,
       onCreate: _onCreate,
+      onUpgrade: _onUpgrade,
     );
   }
 
-  // 데이터베이스가 처음 만들어질 때 실행된다.
+  // 데이터베이스가 처음 만들어질 때 실행
   Future<void> _onCreate(Database db, int version) async {
     // 1. 카테고리 테이블
     await db.execute('''
@@ -74,6 +75,7 @@ class DatabaseHelper {
         date TEXT NOT NULL,
         categoryId INTEGER NOT NULL,
         payer TEXT NOT NULL,
+        paymentMethod TEXT NOT NULL,
         memo TEXT,
         createdAt TEXT NOT NULL
       )
@@ -90,6 +92,17 @@ class DatabaseHelper {
 
     // 4. 기본 카테고리 등록
     await _insertDefaultCategories(db);
+  }
+
+  // 데이터베이스 버전이 올라갔을 때 실행
+  Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
+    // 지출 테이블에 결제수단 컬럼 추가
+    if (oldVersion < 2) {
+      await db.execute('''
+        ALTER TABLE expenses
+        ADD COLUMN paymentMethod TEXT NOT NULL DEFAULT '신용카드'
+        ''');
+    }
   }
 
   // ========================================================= categories =========================================================
@@ -195,6 +208,7 @@ class DatabaseHelper {
         expenses.date,
         expenses.categoryId,
         expenses.payer,
+        expenses.paymentMethod,
         expenses.memo,
         expenses.createdAt,
         categories.name AS categoryName
@@ -214,6 +228,7 @@ class DatabaseHelper {
         date: DateTime.parse(map['date'] as String),
         categoryName: map['categoryName'] as String,
         payer: map['payer'] as String,
+        paymentMethod: map['paymentMethod'] as String,
         memo: map['memo'] as String?,
       );
     }).toList();
@@ -307,6 +322,7 @@ class DatabaseHelper {
           expenses.date, 
           categories.name AS categoryName, 
           expenses.payer, 
+          expenses.paymentMethod,
           expenses.memo 
         FROM expenses 
         INNER JOIN categories 
@@ -322,6 +338,7 @@ class DatabaseHelper {
         date: DateTime.parse(map['date'] as String),
         categoryName: map['categoryName'] as String,
         payer: map['payer'] as String,
+        paymentMethod: map['paymentMethod'] as String,
         memo: map['memo'] as String?,
       );
     }).toList();
@@ -338,6 +355,7 @@ class DatabaseHelper {
         expenses.date,
         categories.name AS categoryName,
         expenses.payer,
+        expenses.paymentMethod,
         expenses.memo
       FROM expenses
       INNER JOIN categories
@@ -352,6 +370,7 @@ class DatabaseHelper {
         date: DateTime.parse(map['date'] as String),
         categoryName: map['categoryName'] as String,
         payer: map['payer'] as String,
+        paymentMethod: map['paymentMethod'] as String,
         memo: map['memo'] as String?,
       );
     }).toList();

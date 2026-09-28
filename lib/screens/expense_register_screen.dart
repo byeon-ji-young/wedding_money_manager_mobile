@@ -29,6 +29,8 @@ class _ExpenseRegisterScreenState extends State<ExpenseRegisterScreen> {
   int? selectedCategoryId;
   // 선택한 결제자
   String selectedPayer = '나';
+  // 선택한 결제수단
+  String selectedPaymentMethod = '신용카드';
   // 카테고리 목록
   List<Category> categories = [];
   // 등록, 수정 판단
@@ -46,6 +48,7 @@ class _ExpenseRegisterScreenState extends State<ExpenseRegisterScreen> {
       selectedDate = widget.expense!.date;
       selectedCategoryId = widget.expense!.categoryId;
       selectedPayer = widget.expense!.payer;
+      selectedPaymentMethod = widget.expense?.paymentMethod ?? '신용카드';
     }
 
     loadCategories();
@@ -107,6 +110,7 @@ class _ExpenseRegisterScreenState extends State<ExpenseRegisterScreen> {
       date: selectedDate,
       categoryId: selectedCategoryId!,
       payer: selectedPayer,
+      paymentMethod: selectedPaymentMethod,
       memo: memoController.text.trim().isEmpty
           ? null
           : memoController.text.trim(),
@@ -475,6 +479,51 @@ class _ExpenseRegisterScreenState extends State<ExpenseRegisterScreen> {
                   ),
                 ),
               ],
+            ),
+
+            const SizedBox(height: 20),
+
+            // 결제수단
+            const Text(
+              '* 결제수단',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+
+            const SizedBox(height: 8),
+
+            DropdownButtonFormField<String>(
+              initialValue: selectedPaymentMethod,
+              decoration: InputDecoration(
+                filled: true,
+                fillColor: Colors.white,
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 14,
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: borderColor),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: primaryColor, width: 1.5),
+                ),
+              ),
+              items: const [
+                DropdownMenuItem(value: '신용카드', child: Text('신용카드')),
+                DropdownMenuItem(value: '체크카드', child: Text('체크카드')),
+                DropdownMenuItem(value: '계좌이체', child: Text('계좌이체')),
+                DropdownMenuItem(value: '현금', child: Text('현금')),
+              ],
+              onChanged: (value) {
+                if (value == null) {
+                  return;
+                }
+
+                setState(() {
+                  selectedPaymentMethod = value;
+                });
+              },
             ),
 
             const SizedBox(height: 20),
