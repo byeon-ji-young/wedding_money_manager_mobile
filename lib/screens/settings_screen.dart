@@ -64,6 +64,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         Card(
           margin: EdgeInsets.zero,
           elevation: 0,
+          color: Theme.of(context).colorScheme.surface,
           clipBehavior: Clip
               .antiAlias, //  Clip.antiAlias는 위젯의 영역 밖으로 삐져나오는 부분을 잘라내되, 경계선을 부드럽게 처리하라는 의미
           child: Column(children: children),
@@ -73,20 +74,26 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   // 설정 메뉴 아이콘
-  Widget buildMenuIcon({required IconData icon, bool isDanger = false}) {
+  Widget buildMenuIcon({
+    required IconData icon,
+    Color? color,
+    bool isDanger = false,
+  }) {
     final colorScheme = Theme.of(context).colorScheme;
 
-    final color = isDanger ? colorScheme.error : colorScheme.primary;
+    final iconColor = isDanger
+        ? colorScheme.error
+        : color ?? colorScheme.primary;
 
     final backgroundColor = isDanger
         ? colorScheme.errorContainer
-        : colorScheme.primaryContainer;
+        : iconColor.withValues(alpha: 0.12);
 
     return Container(
       width: 42,
       height: 42,
       decoration: BoxDecoration(color: backgroundColor, shape: BoxShape.circle),
-      child: Icon(icon, color: color, size: 21),
+      child: Icon(icon, color: iconColor, size: 21),
     );
   }
 
@@ -99,6 +106,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     bool isDanger = false,
     bool showDivider = true,
     String? trailingText,
+    Color? color,
   }) {
     return Column(
       children: [
@@ -107,7 +115,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             horizontal: 18,
             vertical: 2,
           ),
-          leading: buildMenuIcon(icon: icon, isDanger: isDanger),
+          leading: buildMenuIcon(icon: icon, color: color, isDanger: isDanger),
           title: Text(
             title,
             style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
@@ -322,6 +330,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   children: [
                     buildSettingTile(
                       icon: Icons.account_balance_wallet_rounded,
+                      color: Colors.pink,
                       title: '예산 설정',
                       subtitle: budget == null
                           ? '아직 예산이 설정되지 않았어요.'
@@ -363,6 +372,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ),
                     buildSettingTile(
                       icon: Icons.category_rounded,
+                      color: Colors.purple,
                       title: '카테고리 관리',
                       subtitle: '지출 카테고리를 추가하거나 수정할 수 있어요.',
                       onTap: openCategoryManagement,
@@ -379,12 +389,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   children: [
                     buildSettingTile(
                       icon: Icons.backup_rounded,
+                      color: Colors.blue,
                       title: '데이터 백업',
                       subtitle: '결혼자금 데이터를 파일로 저장해요.',
                       onTap: backupData,
                     ),
                     buildSettingTile(
                       icon: Icons.restore_rounded,
+                      color: Colors.teal,
                       title: '데이터 복원',
                       subtitle: '백업한 파일로 데이터를 복원해요.',
                       onTap: restoreData,
@@ -411,7 +423,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         horizontal: 18,
                         vertical: 2,
                       ),
-                      leading: buildMenuIcon(icon: Icons.info_outline_rounded),
+                      leading: buildMenuIcon(
+                        icon: Icons.info_outline_rounded,
+                        color: Colors.grey,
+                      ),
                       title: const Text(
                         '앱 정보',
                         style: TextStyle(
