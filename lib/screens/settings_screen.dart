@@ -316,8 +316,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
           : ListView(
               padding: const EdgeInsets.all(16),
               children: [
+                // 결혼자금 관리
                 buildSection(
-                  title: '데이터 관리',
+                  title: '결혼자금 관리',
                   children: [
                     buildSettingTile(
                       icon: Icons.account_balance_wallet_rounded,
@@ -365,7 +366,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       title: '카테고리 관리',
                       subtitle: '지출 카테고리를 추가하거나 수정할 수 있어요.',
                       onTap: openCategoryManagement,
+                      showDivider: false,
                     ),
+                  ],
+                ),
+
+                const SizedBox(height: 24),
+
+                // 데이터 관리
+                buildSection(
+                  title: '데이터 관리',
+                  children: [
                     buildSettingTile(
                       icon: Icons.backup_rounded,
                       title: '데이터 백업',
@@ -391,6 +402,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
                 const SizedBox(height: 24),
 
+                // 앱 정보
                 buildSection(
                   title: '앱 정보',
                   children: [
