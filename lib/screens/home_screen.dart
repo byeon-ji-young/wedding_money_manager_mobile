@@ -477,11 +477,11 @@ class _HomeScreenState extends State<HomeScreen> {
                       Container(
                         width: double.infinity,
                         padding: const EdgeInsets.all(20),
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.surface,
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(color: borderColor),
-                        ),
+                        // decoration: BoxDecoration(
+                        //   color: Theme.of(context).colorScheme.surface,
+                        //   borderRadius: BorderRadius.circular(20),
+                        //   border: Border.all(color: borderColor),
+                        // ),
                         child: const Center(
                           child: Text(
                             '아직 지출 내역이 없습니다.',
