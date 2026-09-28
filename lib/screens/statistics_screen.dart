@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../database/database_helper.dart';
 
 import '../utils/category_utils.dart';
+import '../utils/payment_method_utils.dart';
 
 import 'category_detail_screen.dart';
 
@@ -433,15 +434,11 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                                     Row(
                                       children: [
                                         Icon(
-                                          paymentMethod == '신용카드'
-                                              ? Icons.credit_card_rounded
-                                              : paymentMethod == '체크카드'
-                                              ? Icons.credit_score_rounded
-                                              : paymentMethod == '계좌이체'
-                                              ? Icons.account_balance_rounded
-                                              : Icons.payments_rounded,
+                                          getPaymentMethodIcon(paymentMethod),
                                           size: 22,
-                                          color: colorScheme.primary,
+                                          color: getPaymentMethodColor(
+                                            paymentMethod,
+                                          ),
                                         ),
 
                                         const SizedBox(width: 10),
@@ -478,6 +475,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                                             child: LinearProgressIndicator(
                                               value: percentage,
                                               minHeight: 7,
+                                              // color: getPaymentMethodColor(paymentMethod),
                                             ),
                                           ),
                                         ),
@@ -492,6 +490,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                                             style: TextStyle(
                                               fontSize: 13,
                                               fontWeight: FontWeight.bold,
+                                              // color: getPaymentMethodColor(paymentMethod),
                                               color: colorScheme.primary,
                                             ),
                                           ),

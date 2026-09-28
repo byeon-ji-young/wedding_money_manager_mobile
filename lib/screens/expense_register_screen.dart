@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 
 import '../utils/date_time_utils.dart';
 import '../utils/category_utils.dart';
+import '../utils/payment_method_utils.dart';
 
 import '../database/database_helper.dart';
 
@@ -542,11 +543,63 @@ class _ExpenseRegisterScreenState extends State<ExpenseRegisterScreen> {
                   borderSide: BorderSide(color: primaryColor, width: 1.5),
                 ),
               ),
-              items: const [
-                DropdownMenuItem(value: '신용카드', child: Text('신용카드')),
-                DropdownMenuItem(value: '체크카드', child: Text('체크카드')),
-                DropdownMenuItem(value: '계좌이체', child: Text('계좌이체')),
-                DropdownMenuItem(value: '현금', child: Text('현금')),
+              items: [
+                DropdownMenuItem(
+                  value: '신용카드',
+                  child: Row(
+                    children: [
+                      Icon(
+                        getPaymentMethodIcon('신용카드'),
+                        size: 20,
+                        color: getPaymentMethodColor('신용카드'),
+                      ),
+                      const SizedBox(width: 10),
+                      const Text('신용카드'),
+                    ],
+                  ),
+                ),
+                DropdownMenuItem(
+                  value: '체크카드',
+                  child: Row(
+                    children: [
+                      Icon(
+                        getPaymentMethodIcon('체크카드'),
+                        size: 20,
+                        color: getPaymentMethodColor('체크카드'),
+                      ),
+                      const SizedBox(width: 10),
+                      const Text('체크카드'),
+                    ],
+                  ),
+                ),
+                DropdownMenuItem(
+                  value: '계좌이체',
+                  child: Row(
+                    children: [
+                      Icon(
+                        getPaymentMethodIcon('계좌이체'),
+                        size: 20,
+                        color: getPaymentMethodColor('계좌이체'),
+                      ),
+                      const SizedBox(width: 10),
+                      const Text('계좌이체'),
+                    ],
+                  ),
+                ),
+                DropdownMenuItem(
+                  value: '현금',
+                  child: Row(
+                    children: [
+                      Icon(
+                        getPaymentMethodIcon('현금'),
+                        size: 20,
+                        color: getPaymentMethodColor('현금'),
+                      ),
+                      const SizedBox(width: 10),
+                      const Text('현금'),
+                    ],
+                  ),
+                ),
               ],
               onChanged: (value) {
                 if (value == null) {

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+// 카테고리별 아이콘
 IconData getCategoryIcon(String categoryName) {
   switch (categoryName) {
     case '예식장':
@@ -40,6 +41,7 @@ IconData getCategoryIcon(String categoryName) {
   }
 }
 
+// 카테고리별 색상
 Color getCategoryColor(String categoryName) {
   switch (categoryName) {
     case '예식장':
