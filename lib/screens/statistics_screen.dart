@@ -324,6 +324,14 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                                               fontWeight: FontWeight.bold,
                                             ),
                                           ),
+
+                                          const SizedBox(width: 6),
+
+                                          Icon(
+                                            Icons.chevron_right_rounded,
+                                            size: 22,
+                                            color: colorScheme.onSurfaceVariant,
+                                          ),
                                         ],
                                       ),
 
