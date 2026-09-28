@@ -413,18 +413,10 @@ class _ExpenseRegisterScreenState extends State<ExpenseRegisterScreen> {
                   value: category.id,
                   child: Row(
                     children: [
-                      Container(
-                        width: 32,
-                        height: 32,
-                        decoration: BoxDecoration(
-                          color: categoryColor.withValues(alpha: 0.12),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          getCategoryIcon(category.name),
-                          color: categoryColor,
-                          size: 17,
-                        ),
+                      Icon(
+                        getCategoryIcon(category.name),
+                        color: categoryColor,
+                        size: 20,
                       ),
                       const SizedBox(width: 10),
                       Text(category.name),

@@ -427,21 +427,31 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                               Padding(
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: 18,
-                                  vertical: 12,
+                                  vertical: 8,
                                 ),
                                 child: Column(
                                   children: [
                                     Row(
                                       children: [
-                                        Icon(
-                                          getPaymentMethodIcon(paymentMethod),
-                                          size: 22,
-                                          color: getPaymentMethodColor(
-                                            paymentMethod,
+                                        Container(
+                                          width: 42,
+                                          height: 42,
+                                          decoration: BoxDecoration(
+                                            color: getPaymentMethodColor(
+                                              paymentMethod,
+                                            ).withValues(alpha: 0.12),
+                                            shape: BoxShape.circle,
+                                          ),
+                                          child: Icon(
+                                            getPaymentMethodIcon(paymentMethod),
+                                            color: getPaymentMethodColor(
+                                              paymentMethod,
+                                            ),
+                                            size: 21,
                                           ),
                                         ),
 
-                                        const SizedBox(width: 10),
+                                        const SizedBox(width: 12),
 
                                         Expanded(
                                           child: Text(
@@ -463,7 +473,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                                       ],
                                     ),
 
-                                    const SizedBox(height: 10),
+                                    const SizedBox(height: 4),
 
                                     Row(
                                       children: [
