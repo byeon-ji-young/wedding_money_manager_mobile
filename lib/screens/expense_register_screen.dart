@@ -236,6 +236,9 @@ class _ExpenseRegisterScreenState extends State<ExpenseRegisterScreen> {
       appBar: AppBar(
         // title: Text(isEditMode ? '지출 수정' : '지출 추가'),
         centerTitle: true,
+        scrolledUnderElevation: 0,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        surfaceTintColor: Colors.transparent,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
