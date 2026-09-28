@@ -73,6 +73,11 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  // 날짜를 yyyy.MM.dd 형식으로 표시
+  String formatDate(DateTime date) {
+    return '${date.year}.${date.month.toString().padLeft(2, '0')}.${date.day.toString().padLeft(2, '0')}';
+  }
+
   @override
   Widget build(BuildContext context) {
     // 남은 예산
@@ -553,10 +558,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                       ),
                                     ),
                                     subtitle: Text(
-                                      '${expense.payer} · '
-                                      '${expense.date.year}.'
-                                      '${expense.date.month}.'
-                                      '${expense.date.day}',
+                                      '${formatDate(expense.date)} · ${expense.paymentMethod}',
                                     ),
                                     trailing: Row(
                                       mainAxisSize: MainAxisSize.min,

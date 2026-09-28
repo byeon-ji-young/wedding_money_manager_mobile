@@ -65,7 +65,7 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen> {
     );
   }
 
-  // 날짜를 yyyy.MM.dd 형식으로 표시한다.
+  // 날짜를 yyyy.MM.dd 형식으로 표시
   String formatDate(DateTime date) {
     return '${date.year}.${date.month.toString().padLeft(2, '0')}.${date.day.toString().padLeft(2, '0')}';
   }
@@ -276,7 +276,7 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen> {
                                                   ),
                                                   const SizedBox(height: 4),
                                                   Text(
-                                                    '${formatDate(expense.date)} · ${expense.payer}',
+                                                    '${formatDate(expense.date)} · ${expense.paymentMethod}',
                                                     style: TextStyle(
                                                       fontSize: 13,
                                                       color: colorScheme
