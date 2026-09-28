@@ -614,7 +614,14 @@ class DatabaseHelper {
 
       // 지출 복원
       for (final expense in expenses) {
-        await txn.insert('expenses', Map<String, dynamic>.from(expense));
+        // await txn.insert('expenses', Map<String, dynamic>.from(expense));
+
+        final expenseData = Map<String, dynamic>.from(expense);
+
+        // 예전 백업 파일에는 결제수단이 없을 수 있으므로 기본값 설정
+        expenseData['paymentMethod'] ??= '신용카드';
+
+        await txn.insert('expenses', expenseData);
       }
 
       // 설정 복원
